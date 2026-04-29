@@ -36,7 +36,20 @@ function NewInvoice() {
   const [status, setStatus] = useState<"paid" | "pending">("pending");
   const [fxRate, setFxRate] = useState(83.5);
 
-  useEffect(() => { getUsdToInr().then(setFxRate); }, []);
+  // Tally-style fields
+  const [serviceTitle, setServiceTitle] = useState("AWS-SERVICES");
+  const [hsnCode, setHsnCode] = useState("998315");
+  const [referenceNo, setReferenceNo] = useState("");
+  const [buyersOrderNo, setBuyersOrderNo] = useState("");
+  const [paymentTerms, setPaymentTerms] = useState("");
+  const [placeOfSupply, setPlaceOfSupply] = useState("Telangana");
+  const [roundOff, setRoundOff] = useState("0");
+  const [subItems, setSubItems] = useState<InvoiceSubItem[]>([]);
+
+  const addSubItem = () => setSubItems((s) => [...s, { label: "", amount: 0 }]);
+  const removeSubItem = (i: number) => setSubItems((s) => s.filter((_, idx) => idx !== i));
+  const updateSubItem = (i: number, patch: Partial<InvoiceSubItem>) =>
+    setSubItems((s) => s.map((it, idx) => (idx === i ? { ...it, ...patch } : it)));
 
   const calc = useMemo(() => {
     const orig = parseFloat(amount) || 0;
