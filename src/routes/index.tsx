@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { useAuth } from "@/lib/store";
+import { useAuth, useHydrated } from "@/lib/store";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
@@ -24,9 +24,10 @@ function LoginPage() {
   const [p, setP] = useState("admin123");
   const login = useAuth((s) => s.login);
   const loggedIn = useAuth((s) => s.loggedIn);
+  const hydrated = useHydrated();
   const navigate = useNavigate();
 
-  useEffect(() => { if (loggedIn) navigate({ to: "/dashboard" }); }, [loggedIn, navigate]);
+  useEffect(() => { if (hydrated && loggedIn) navigate({ to: "/dashboard" }); }, [hydrated, loggedIn, navigate]);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
