@@ -7,7 +7,7 @@ import { FileText, CheckCircle2, Clock, IndianRupee, ArrowUpRight } from "lucide
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/dashboard")({
-  head: () => ({ meta: [{ title: "Dashboard — Billwise" }] }),
+  head: () => ({ meta: [{ title: "Dashboard — Apoyphe" }] }),
   component: Dashboard,
 });
 

@@ -8,7 +8,7 @@ import { Download, ArrowLeft } from "lucide-react";
 import jsPDF from "jspdf";
 
 export const Route = createFileRoute("/invoices/$id")({
-  head: () => ({ meta: [{ title: "Invoice Preview — Billwise" }] }),
+  head: () => ({ meta: [{ title: "Invoice Preview — Apoyphe" }] }),
   component: InvoicePreview,
 });
 

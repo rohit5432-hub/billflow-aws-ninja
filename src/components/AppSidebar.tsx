@@ -24,9 +24,9 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border">
         <Link to="/dashboard" className="flex items-center gap-2 px-2 py-2">
-          <img src={logo} alt="Billwise logo" className="h-9 w-9 rounded-lg object-contain" />
+          <img src={logo} alt="Apoyphe logo" className="h-9 w-9 rounded-lg object-contain" />
           <div className="group-data-[collapsible=icon]:hidden">
-            <div className="text-sm font-semibold text-sidebar-foreground">Billwise</div>
+            <div className="text-sm font-semibold text-sidebar-foreground">Apoyphe</div>
             <div className="text-xs text-sidebar-foreground/60">Invoice Suite</div>
           </div>
         </Link>
