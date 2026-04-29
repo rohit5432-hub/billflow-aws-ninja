@@ -83,7 +83,15 @@ function InvoicePreview() {
       y += bold ? 22 : 16;
     };
     row("Subtotal", formatINR(invoice.amount));
-    row(`GST (${invoice.gstRate}%)`, formatINR(invoice.gstAmount));
+    const gstType = invoice.gstType ?? "CGST_SGST";
+    if (gstType === "IGST") {
+      row(`IGST (${invoice.gstRate}%)`, formatINR(invoice.gstAmount));
+    } else {
+      const half = invoice.gstAmount / 2;
+      const halfRate = invoice.gstRate / 2;
+      row(`CGST (${halfRate}%)`, formatINR(half));
+      row(`${gstType === "CGST_UTGST" ? "UTGST" : "SGST"} (${halfRate}%)`, formatINR(half));
+    }
     doc.line(W - 200, y - 8, W - 40, y - 8);
     row("Total", formatINR(invoice.total), true);
 
@@ -153,7 +161,14 @@ function InvoicePreview() {
         <div className="flex justify-end">
           <div className="w-72 space-y-2 text-sm">
             <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>{formatINR(invoice.amount)}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">GST ({invoice.gstRate}%)</span><span>{formatINR(invoice.gstAmount)}</span></div>
+            {(invoice.gstType ?? "CGST_SGST") === "IGST" ? (
+              <div className="flex justify-between"><span className="text-muted-foreground">IGST ({invoice.gstRate}%)</span><span>{formatINR(invoice.gstAmount)}</span></div>
+            ) : (
+              <>
+                <div className="flex justify-between"><span className="text-muted-foreground">CGST ({invoice.gstRate / 2}%)</span><span>{formatINR(invoice.gstAmount / 2)}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">{(invoice.gstType ?? "CGST_SGST") === "CGST_UTGST" ? "UTGST" : "SGST"} ({invoice.gstRate / 2}%)</span><span>{formatINR(invoice.gstAmount / 2)}</span></div>
+              </>
+            )}
             <div className="flex justify-between border-t pt-2 text-base font-bold"><span>Total</span><span className="text-primary">{formatINR(invoice.total)}</span></div>
           </div>
         </div>

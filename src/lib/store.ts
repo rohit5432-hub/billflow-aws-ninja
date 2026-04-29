@@ -18,6 +18,8 @@ export type Customer = {
   address: string;
 };
 
+export type GstType = "CGST_SGST" | "IGST" | "CGST_UTGST";
+
 export type Invoice = {
   id: string;
   number: string;
@@ -27,6 +29,7 @@ export type Invoice = {
   currency: "INR" | "USD";
   fxRate: number; // 1 USD = X INR (1 if INR)
   gstRate: 5 | 12 | 18;
+  gstType: GstType;
   gstAmount: number;
   total: number;
   status: "paid" | "pending";
