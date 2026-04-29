@@ -18,7 +18,14 @@ export const Route = createFileRoute("/company")({
 function CompanyPage() {
   const company = useData((s) => s.company);
   const setCompany = useData((s) => s.setCompany);
-  const [form, setForm] = useState({ name: "", email: "", phone: "", gstin: "", address: "" });
+  const defaults = {
+    name: "Apoyphe Software Services Private Limited",
+    email: "",
+    phone: "+91 99489 03222",
+    gstin: "36ABCDE1234F1Z5",
+    address: "4th Floor, Ayyappa Society, 467, Gouri Shankara Nilayam,\nMadhapur, Telangana 500081",
+  };
+  const [form, setForm] = useState(defaults);
 
   useEffect(() => { if (company) setForm(company); }, [company]);
 
