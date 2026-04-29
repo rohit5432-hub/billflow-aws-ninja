@@ -66,11 +66,21 @@ function NewInvoice() {
     if (!company) { toast.error("Save your company details first"); navigate({ to: "/company" }); return; }
     if (!customerId) { toast.error("Select a customer"); return; }
     if (calc.orig <= 0) { toast.error("Enter a valid amount"); return; }
+    const ro = parseFloat(roundOff) || 0;
     const inv: Omit<Invoice, "id" | "number"> = {
       customerId, amount: calc.inr, originalAmount: calc.orig, currency,
       fxRate: currency === "USD" ? fxRate : 1,
       gstRate, gstType, gstAmount: calc.gstAmount, total: calc.total,
       status, invoiceDate, dueDate,
+      serviceTitle: serviceTitle.trim() || undefined,
+      hsnCode: hsnCode.trim() || undefined,
+      referenceNo: referenceNo.trim() || undefined,
+      buyersOrderNo: buyersOrderNo.trim() || undefined,
+      paymentTerms: paymentTerms.trim() || undefined,
+      placeOfSupply: placeOfSupply.trim() || undefined,
+      consigneeSameAsBuyer: true,
+      roundOff: ro || undefined,
+      subItems: subItems.filter((s) => s.label.trim() && s.amount > 0),
     };
     const created = addInvoice(inv);
     toast.success("Invoice created");
