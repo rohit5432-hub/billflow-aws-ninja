@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { Save } from "lucide-react";
 
 export const Route = createFileRoute("/company")({
-  head: () => ({ meta: [{ title: "Company — Billwise" }] }),
+  head: () => ({ meta: [{ title: "Company — Apoyphe" }] }),
   component: CompanyPage,
 });
 

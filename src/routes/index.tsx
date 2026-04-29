@@ -12,7 +12,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Login — Billwise Invoice Suite" },
+      { title: "Login — Apoyphe Invoice Suite" },
       { name: "description", content: "Sign in to manage invoices, customers and revenue." },
     ],
   }),
@@ -42,8 +42,8 @@ function LoginPage() {
     <div className="min-h-screen flex items-center justify-center p-4 bg-[radial-gradient(ellipse_at_top,oklch(0.94_0.05_265),transparent_50%),radial-gradient(ellipse_at_bottom,oklch(0.95_0.04_290),transparent_50%)]">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <img src={logo} alt="Billwise logo" className="mx-auto mb-4 h-14 w-14 object-contain" />
-          <h1 className="text-3xl font-bold tracking-tight">Billwise</h1>
+          <img src={logo} alt="Apoyphe logo" className="mx-auto mb-4 h-14 w-14 object-contain" />
+          <h1 className="text-3xl font-bold tracking-tight">Apoyphe</h1>
           <p className="text-sm text-muted-foreground mt-1">Invoice billing, beautifully simple</p>
         </div>
 

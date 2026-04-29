@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { FilePlus2 } from "lucide-react";
 
 export const Route = createFileRoute("/invoices/new")({
-  head: () => ({ meta: [{ title: "Create Invoice — Billwise" }] }),
+  head: () => ({ meta: [{ title: "Create Invoice — Apoyphe" }] }),
   component: NewInvoice,
 });
 

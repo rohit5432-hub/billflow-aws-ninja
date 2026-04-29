@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { UserPlus } from "lucide-react";
 
 export const Route = createFileRoute("/customers")({
-  head: () => ({ meta: [{ title: "Customers — Billwise" }] }),
+  head: () => ({ meta: [{ title: "Customers — Apoyphe" }] }),
   component: CustomersPage,
 });
 

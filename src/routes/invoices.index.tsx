@@ -10,7 +10,7 @@ import { formatINR } from "@/lib/fx";
 import { FilePlus2, Eye } from "lucide-react";
 
 export const Route = createFileRoute("/invoices/")({
-  head: () => ({ meta: [{ title: "Invoices — Billwise" }] }),
+  head: () => ({ meta: [{ title: "Invoices — Apoyphe" }] }),
   component: InvoicesList,
 });
 
