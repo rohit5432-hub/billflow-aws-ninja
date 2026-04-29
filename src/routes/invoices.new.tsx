@@ -51,6 +51,8 @@ function NewInvoice() {
   const updateSubItem = (i: number, patch: Partial<InvoiceSubItem>) =>
     setSubItems((s) => s.map((it, idx) => (idx === i ? { ...it, ...patch } : it)));
 
+  useEffect(() => { getUsdToInr().then(setFxRate); }, []);
+
   const calc = useMemo(() => {
     const orig = parseFloat(amount) || 0;
     const inr = currency === "USD" ? orig * fxRate : orig;
