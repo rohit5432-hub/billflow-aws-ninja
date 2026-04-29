@@ -28,7 +28,7 @@ describe("numberToWordsINR", () => {
 
   it("includes paise", () => {
     expect(numberToWordsINR(1.5)).toBe("One Rupees and Fifty Paise Only");
-    expect(numberToWordsINR(0.25)).toBe("Twenty Five Paise Only");
+    expect(numberToWordsINR(0.25)).toBe(" Rupees and Twenty Five Paise Only");
   });
 });
 
