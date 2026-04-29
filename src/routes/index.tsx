@@ -1,26 +1,72 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { Receipt, Lock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card } from "@/components/ui/card";
+import { useAuth } from "@/lib/store";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "Login — Billwise Invoice Suite" },
+      { name: "description", content: "Sign in to manage invoices, customers and revenue." },
+    ],
+  }),
+  component: LoginPage,
 });
 
-// IMPORTANT: Replace this placeholder. For sites with multiple pages (About, Services, Contact, etc.),
-// create separate route files (about.tsx, services.tsx, contact.tsx) — don't put all pages in this file.
-function PlaceholderIndex() {
+function LoginPage() {
+  const [u, setU] = useState("admin");
+  const [p, setP] = useState("admin123");
+  const login = useAuth((s) => s.login);
+  const loggedIn = useAuth((s) => s.loggedIn);
+  const navigate = useNavigate();
+
+  useEffect(() => { if (loggedIn) navigate({ to: "/dashboard" }); }, [loggedIn, navigate]);
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (login(u, p)) {
+      toast.success("Welcome back");
+      navigate({ to: "/dashboard" });
+    } else {
+      toast.error("Invalid credentials");
+    }
+  };
+
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="min-h-screen flex items-center justify-center p-4 bg-[radial-gradient(ellipse_at_top,oklch(0.94_0.05_265),transparent_50%),radial-gradient(ellipse_at_bottom,oklch(0.95_0.04_290),transparent_50%)]">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary-glow shadow-elegant">
+            <Receipt className="h-7 w-7 text-primary-foreground" />
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight">Billwise</h1>
+          <p className="text-sm text-muted-foreground mt-1">Invoice billing, beautifully simple</p>
+        </div>
+
+        <Card className="p-6 shadow-elegant border-border/50">
+          <form onSubmit={submit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="u">Username</Label>
+              <Input id="u" value={u} onChange={(e) => setU(e.target.value)} autoFocus />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="p">Password</Label>
+              <Input id="p" type="password" value={p} onChange={(e) => setP(e.target.value)} />
+            </div>
+            <Button type="submit" className="w-full bg-gradient-to-r from-primary to-primary-glow hover:opacity-90">
+              <Lock className="h-4 w-4 mr-2" /> Sign in
+            </Button>
+            <p className="text-xs text-muted-foreground text-center pt-2">
+              Demo credentials: <span className="font-mono">admin / admin123</span>
+            </p>
+          </form>
+        </Card>
+      </div>
     </div>
   );
-}
-
-function Index() {
-  return <PlaceholderIndex />;
 }
