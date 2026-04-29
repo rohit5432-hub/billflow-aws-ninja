@@ -96,9 +96,11 @@ type DataState = {
   customers: Customer[];
   invoices: Invoice[];
   setCompany: (c: Company) => void;
-  addCustomer: (c: Omit<Customer, "id">) => void;
+  addCustomer: (c: Omit<Customer, "id">) => Customer;
   addInvoice: (i: Omit<Invoice, "id" | "number">) => Invoice;
   setInvoiceStatus: (id: string, status: "paid" | "pending") => void;
+  loadSampleData: () => void;
+  resetAll: () => void;
 };
 
 export const useData = create<DataState>()(
@@ -108,10 +110,11 @@ export const useData = create<DataState>()(
       customers: [],
       invoices: [],
       setCompany: (c) => set({ company: c }),
-      addCustomer: (c) =>
-        set((s) => ({
-          customers: [...s.customers, { ...c, id: crypto.randomUUID() }],
-        })),
+      addCustomer: (c) => {
+        const customer = { ...c, id: crypto.randomUUID() };
+        set((s) => ({ customers: [...s.customers, customer] }));
+        return customer;
+      },
       addInvoice: (i) => {
         const number = `INV-${String(get().invoices.length + 1).padStart(4, "0")}`;
         const inv: Invoice = { ...i, id: crypto.randomUUID(), number };
@@ -122,6 +125,90 @@ export const useData = create<DataState>()(
         set((s) => ({
           invoices: s.invoices.map((x) => (x.id === id ? { ...x, status } : x)),
         })),
+      loadSampleData: () => {
+        const today = new Date();
+        const iso = (offset = 0) =>
+          new Date(today.getTime() + offset * 86400000).toISOString().slice(0, 10);
+
+        // Company
+        set({
+          company: {
+            name: "Apoyphe Software Services Private Limited",
+            email: "billing@apoyphe.com",
+            phone: "+91 99489 03222",
+            gstin: "36ABCDE1234F1Z5",
+            address:
+              "4th Floor, Ayyappa Society, 467, Gouri Shankara Nilayam,\nMadhapur, Telangana 500081",
+          },
+        });
+
+        // 3 customers covering intra-state, inter-state, UT
+        const customers: Customer[] = [
+          {
+            id: crypto.randomUUID(),
+            name: "Hyderabad Tech Pvt Ltd",
+            gstin: "36AAACH1234J1Z2",
+            email: "ap@hyderabadtech.in",
+            address: "Plot 12, HITEC City,\nHyderabad, Telangana 500081",
+          },
+          {
+            id: crypto.randomUUID(),
+            name: "Bengaluru Logistics LLP",
+            gstin: "29AABCB5678K1Z9",
+            email: "accounts@blr-logistics.in",
+            address: "MG Road, Bengaluru, Karnataka 560001",
+          },
+          {
+            id: crypto.randomUUID(),
+            name: "Chandigarh Retail Group",
+            gstin: "04AACCC9012L1Z3",
+            email: "finance@chd-retail.in",
+            address: "Sector 17, Chandigarh 160017",
+          },
+        ];
+        set({ customers });
+
+        // 4 sample invoices: CGST+SGST paid, IGST pending USD, CGST+UTGST paid, IGST pending small
+        const samples: Omit<Invoice, "id" | "number">[] = [
+          {
+            customerId: customers[0].id,
+            amount: 50000, originalAmount: 50000, currency: "INR", fxRate: 1,
+            gstRate: 18, gstType: "CGST_SGST",
+            gstAmount: 9000, total: 59000,
+            status: "paid", invoiceDate: iso(-20), dueDate: iso(-5),
+          },
+          {
+            customerId: customers[1].id,
+            amount: 1200 * 83.5, originalAmount: 1200, currency: "USD", fxRate: 83.5,
+            gstRate: 18, gstType: "IGST",
+            gstAmount: (1200 * 83.5 * 18) / 100,
+            total: 1200 * 83.5 + (1200 * 83.5 * 18) / 100,
+            status: "pending", invoiceDate: iso(-7), dueDate: iso(8),
+          },
+          {
+            customerId: customers[2].id,
+            amount: 28000, originalAmount: 28000, currency: "INR", fxRate: 1,
+            gstRate: 12, gstType: "CGST_UTGST",
+            gstAmount: 3360, total: 31360,
+            status: "paid", invoiceDate: iso(-12), dueDate: iso(3),
+          },
+          {
+            customerId: customers[1].id,
+            amount: 8500, originalAmount: 8500, currency: "INR", fxRate: 1,
+            gstRate: 5, gstType: "IGST",
+            gstAmount: 425, total: 8925,
+            status: "pending", invoiceDate: iso(-2), dueDate: iso(13),
+          },
+        ];
+
+        const invoices: Invoice[] = samples.map((s, idx) => ({
+          ...s,
+          id: crypto.randomUUID(),
+          number: `INV-${String(idx + 1).padStart(4, "0")}`,
+        }));
+        set({ invoices });
+      },
+      resetAll: () => set({ company: null, customers: [], invoices: [] }),
     }),
     {
       name: "billing-data",

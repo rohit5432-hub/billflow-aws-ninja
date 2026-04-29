@@ -3,8 +3,9 @@ import { AppLayout } from "@/components/AppLayout";
 import { Card } from "@/components/ui/card";
 import { useData } from "@/lib/store";
 import { formatINR } from "@/lib/fx";
-import { FileText, CheckCircle2, Clock, IndianRupee, ArrowUpRight } from "lucide-react";
+import { FileText, CheckCircle2, Clock, IndianRupee, ArrowUpRight, Sparkles, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Apoyphe" }] }),
@@ -13,6 +14,8 @@ export const Route = createFileRoute("/dashboard")({
 
 function Dashboard() {
   const invoices = useData((s) => s.invoices);
+  const loadSampleData = useData((s) => s.loadSampleData);
+  const resetAll = useData((s) => s.resetAll);
   const paid = invoices.filter((i) => i.status === "paid");
   const pending = invoices.filter((i) => i.status === "pending");
   const revenue = paid.reduce((sum, i) => sum + i.total, 0);
@@ -28,6 +31,31 @@ function Dashboard() {
   return (
     <AppLayout title="Dashboard">
       <div className="space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm text-muted-foreground">Test the app quickly with seeded sample data.</p>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => { loadSampleData(); toast.success("Sample data loaded"); }}
+            >
+              <Sparkles className="h-4 w-4 mr-2" />Load sample data
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                if (confirm("Clear company, customers and invoices?")) {
+                  resetAll();
+                  toast.success("Data cleared");
+                }
+              }}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />Reset
+            </Button>
+          </div>
+        </div>
+
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {stats.map((s) => (
             <Card key={s.label} className="p-5 bg-[image:var(--gradient-card)] border-border/60 shadow-soft hover:shadow-elegant transition-shadow">
