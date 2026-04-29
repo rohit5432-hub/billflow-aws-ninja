@@ -6,10 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useData, type Invoice, type GstType } from "@/lib/store";
+import { useData, type Invoice, type GstType, type InvoiceSubItem } from "@/lib/store";
 import { getUsdToInr, formatINR } from "@/lib/fx";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { FilePlus2 } from "lucide-react";
+import { FilePlus2, Plus, Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/invoices/new")({
   head: () => ({ meta: [{ title: "Create Invoice — Apoyphe" }] }),
