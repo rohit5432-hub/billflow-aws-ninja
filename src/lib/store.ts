@@ -1,5 +1,6 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
+import { useEffect, useState } from "react";
 
 export type Company = {
   name: string;
@@ -55,9 +56,37 @@ export const useAuth = create<AuthState>()(
       },
       logout: () => set({ loggedIn: false, username: null }),
     }),
-    { name: "billing-auth" }
+    {
+      name: "billing-auth",
+      storage: createJSONStorage(() =>
+        typeof window !== "undefined" ? window.localStorage : (undefined as any)
+      ),
+    }
   )
 );
+
+/** True once zustand-persist has rehydrated from localStorage (client-only). */
+export function useHydrated() {
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => {
+    const check = () => {
+      if (
+        useAuth.persist.hasHydrated() &&
+        useData.persist.hasHydrated()
+      ) {
+        setHydrated(true);
+      }
+    };
+    check();
+    const u1 = useAuth.persist.onFinishHydration(check);
+    const u2 = useData.persist.onFinishHydration(check);
+    return () => {
+      u1();
+      u2();
+    };
+  }, []);
+  return hydrated;
+}
 
 type DataState = {
   company: Company | null;
@@ -91,6 +120,11 @@ export const useData = create<DataState>()(
           invoices: s.invoices.map((x) => (x.id === id ? { ...x, status } : x)),
         })),
     }),
-    { name: "billing-data" }
+    {
+      name: "billing-data",
+      storage: createJSONStorage(() =>
+        typeof window !== "undefined" ? window.localStorage : (undefined as any)
+      ),
+    }
   )
 );

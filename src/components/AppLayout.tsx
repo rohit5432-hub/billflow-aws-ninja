@@ -2,17 +2,19 @@ import { ReactNode, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
-import { useAuth } from "@/lib/store";
+import { useAuth, useHydrated } from "@/lib/store";
 
 export function AppLayout({ children, title }: { children: ReactNode; title: string }) {
   const loggedIn = useAuth((s) => s.loggedIn);
+  const hydrated = useHydrated();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loggedIn) navigate({ to: "/" });
-  }, [loggedIn, navigate]);
+    if (hydrated && !loggedIn) navigate({ to: "/" });
+  }, [hydrated, loggedIn, navigate]);
 
-  if (!loggedIn) return null;
+  // While persisted auth is rehydrating, render the shell (avoids redirect flash).
+  if (hydrated && !loggedIn) return null;
 
   return (
     <SidebarProvider>
