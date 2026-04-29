@@ -106,10 +106,14 @@ type DataState = {
   company: Company | null;
   customers: Customer[];
   invoices: Invoice[];
+  users: TeamUser[];
   setCompany: (c: Company) => void;
   addCustomer: (c: Omit<Customer, "id">) => Customer;
   addInvoice: (i: Omit<Invoice, "id" | "number">) => Invoice;
   setInvoiceStatus: (id: string, status: "paid" | "pending") => void;
+  addUser: (u: Omit<TeamUser, "id" | "createdAt">) => TeamUser;
+  updateUser: (id: string, patch: Partial<Omit<TeamUser, "id" | "createdAt">>) => void;
+  deleteUser: (id: string) => void;
   loadSampleData: () => void;
   resetAll: () => void;
 };
@@ -120,6 +124,7 @@ export const useData = create<DataState>()(
       company: null,
       customers: [],
       invoices: [],
+      users: [],
       setCompany: (c) => set({ company: c }),
       addCustomer: (c) => {
         const customer = { ...c, id: crypto.randomUUID() };
@@ -132,6 +137,21 @@ export const useData = create<DataState>()(
         set((s) => ({ invoices: [inv, ...s.invoices] }));
         return inv;
       },
+      addUser: (u) => {
+        const user: TeamUser = {
+          ...u,
+          id: crypto.randomUUID(),
+          createdAt: new Date().toISOString(),
+        };
+        set((s) => ({ users: [user, ...s.users] }));
+        return user;
+      },
+      updateUser: (id, patch) =>
+        set((s) => ({
+          users: s.users.map((u) => (u.id === id ? { ...u, ...patch } : u)),
+        })),
+      deleteUser: (id) =>
+        set((s) => ({ users: s.users.filter((u) => u.id !== id) })),
       setInvoiceStatus: (id, status) =>
         set((s) => ({
           invoices: s.invoices.map((x) => (x.id === id ? { ...x, status } : x)),
