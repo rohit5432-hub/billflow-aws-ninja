@@ -31,11 +31,18 @@ export type TeamUser = {
   createdAt: string;
 };
 
+/** Optional sub-line shown under the main service row (Tally style breakdown). */
+export type InvoiceSubItem = {
+  label: string;
+  amount: number;
+  italic?: boolean;
+};
+
 export type Invoice = {
   id: string;
   number: string;
   customerId: string;
-  amount: number; // amount in INR (post-conversion)
+  amount: number; // amount in INR (post-conversion) = subtotal / taxable value
   originalAmount: number;
   currency: "INR" | "USD";
   fxRate: number; // 1 USD = X INR (1 if INR)
@@ -46,6 +53,16 @@ export type Invoice = {
   status: "paid" | "pending";
   invoiceDate: string;
   dueDate: string;
+  // ---- Tally-style optional fields ----
+  serviceTitle?: string;       // e.g. "AWS-SERVICES"
+  hsnCode?: string;            // e.g. "998315"
+  subItems?: InvoiceSubItem[]; // breakdown rows under the main service
+  referenceNo?: string;
+  buyersOrderNo?: string;
+  paymentTerms?: string;
+  placeOfSupply?: string;
+  consigneeSameAsBuyer?: boolean;
+  roundOff?: number;           // can be negative
 };
 
 type AuthState = {
@@ -203,10 +220,22 @@ export const useData = create<DataState>()(
         const samples: Omit<Invoice, "id" | "number">[] = [
           {
             customerId: customers[0].id,
-            amount: 50000, originalAmount: 50000, currency: "INR", fxRate: 1,
+            amount: 68729.84, originalAmount: 68729.84, currency: "INR", fxRate: 1,
             gstRate: 18, gstType: "CGST_SGST",
-            gstAmount: 9000, total: 59000,
+            gstAmount: 12371.37, total: 81101.21,
             status: "paid", invoiceDate: iso(-20), dueDate: iso(-5),
+            serviceTitle: "AWS-SERVICES",
+            hsnCode: "998315",
+            subItems: [
+              { label: "Data Transfer & Configuration", amount: 30728.0 },
+              { label: "New organisation Set-up", amount: 6440, italic: true },
+              { label: "Manage Services", amount: 8000 },
+              { label: "Previous Month GST Amount", amount: 23561.84, italic: true },
+            ],
+            referenceNo: "PO-2026-014",
+            placeOfSupply: "Telangana",
+            consigneeSameAsBuyer: true,
+            roundOff: -0.21,
           },
           {
             customerId: customers[1].id,
@@ -215,6 +244,10 @@ export const useData = create<DataState>()(
             gstAmount: (1200 * 83.5 * 18) / 100,
             total: 1200 * 83.5 + (1200 * 83.5 * 18) / 100,
             status: "pending", invoiceDate: iso(-7), dueDate: iso(8),
+            serviceTitle: "CONSULTING SERVICES",
+            hsnCode: "998314",
+            placeOfSupply: "Karnataka",
+            consigneeSameAsBuyer: true,
           },
           {
             customerId: customers[2].id,
@@ -222,6 +255,10 @@ export const useData = create<DataState>()(
             gstRate: 12, gstType: "CGST_UTGST",
             gstAmount: 3360, total: 31360,
             status: "paid", invoiceDate: iso(-12), dueDate: iso(3),
+            serviceTitle: "SOFTWARE LICENSE",
+            hsnCode: "998313",
+            placeOfSupply: "Chandigarh",
+            consigneeSameAsBuyer: true,
           },
           {
             customerId: customers[1].id,
@@ -229,6 +266,10 @@ export const useData = create<DataState>()(
             gstRate: 5, gstType: "IGST",
             gstAmount: 425, total: 8925,
             status: "pending", invoiceDate: iso(-2), dueDate: iso(13),
+            serviceTitle: "SUPPORT SERVICES",
+            hsnCode: "998316",
+            placeOfSupply: "Karnataka",
+            consigneeSameAsBuyer: true,
           },
         ];
 
