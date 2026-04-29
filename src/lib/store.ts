@@ -239,7 +239,7 @@ export const useData = create<DataState>()(
         }));
         set({ invoices });
       },
-      resetAll: () => set({ company: null, customers: [], invoices: [] }),
+      resetAll: () => set({ company: null, customers: [], invoices: [], users: [] }),
     }),
     {
       name: "billing-data",
