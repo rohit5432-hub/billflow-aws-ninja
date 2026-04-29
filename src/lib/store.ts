@@ -20,6 +20,17 @@ export type Customer = {
 
 export type GstType = "CGST_SGST" | "IGST" | "CGST_UTGST";
 
+export type UserRole = "admin" | "manager" | "accountant" | "viewer";
+
+export type TeamUser = {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  phone?: string;
+  createdAt: string;
+};
+
 export type Invoice = {
   id: string;
   number: string;
