@@ -31,11 +31,18 @@ export type TeamUser = {
   createdAt: string;
 };
 
+/** Optional sub-line shown under the main service row (Tally style breakdown). */
+export type InvoiceSubItem = {
+  label: string;
+  amount: number;
+  italic?: boolean;
+};
+
 export type Invoice = {
   id: string;
   number: string;
   customerId: string;
-  amount: number; // amount in INR (post-conversion)
+  amount: number; // amount in INR (post-conversion) = subtotal / taxable value
   originalAmount: number;
   currency: "INR" | "USD";
   fxRate: number; // 1 USD = X INR (1 if INR)
@@ -46,6 +53,16 @@ export type Invoice = {
   status: "paid" | "pending";
   invoiceDate: string;
   dueDate: string;
+  // ---- Tally-style optional fields ----
+  serviceTitle?: string;       // e.g. "AWS-SERVICES"
+  hsnCode?: string;            // e.g. "998315"
+  subItems?: InvoiceSubItem[]; // breakdown rows under the main service
+  referenceNo?: string;
+  buyersOrderNo?: string;
+  paymentTerms?: string;
+  placeOfSupply?: string;
+  consigneeSameAsBuyer?: boolean;
+  roundOff?: number;           // can be negative
 };
 
 type AuthState = {
