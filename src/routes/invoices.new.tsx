@@ -131,7 +131,14 @@ function NewInvoice() {
           <h3 className="font-semibold">Summary</h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between"><span className="text-muted-foreground">Subtotal (INR)</span><span className="font-medium">{formatINR(calc.inr)}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">GST ({gstRate}%)</span><span className="font-medium">{formatINR(calc.gstAmount)}</span></div>
+            {gstType === "IGST" ? (
+              <div className="flex justify-between"><span className="text-muted-foreground">IGST ({gstRate}%)</span><span className="font-medium">{formatINR(calc.gstAmount)}</span></div>
+            ) : (
+              <>
+                <div className="flex justify-between"><span className="text-muted-foreground">CGST ({gstRate / 2}%)</span><span className="font-medium">{formatINR(calc.gstAmount / 2)}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">{gstType === "CGST_UTGST" ? "UTGST" : "SGST"} ({gstRate / 2}%)</span><span className="font-medium">{formatINR(calc.gstAmount / 2)}</span></div>
+              </>
+            )}
             <div className="border-t pt-2 flex justify-between text-base"><span className="font-semibold">Total</span><span className="font-bold text-primary">{formatINR(calc.total)}</span></div>
           </div>
           <Button type="submit" className="w-full bg-gradient-to-r from-primary to-primary-glow"><FilePlus2 className="h-4 w-4 mr-2" />Create Invoice</Button>
