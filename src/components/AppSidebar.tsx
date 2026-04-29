@@ -1,5 +1,5 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { LayoutDashboard, Building2, Users, FileText, FilePlus2, LogOut } from "lucide-react";
+import { LayoutDashboard, Building2, Users, FileText, FilePlus2, LogOut, UserCog } from "lucide-react";
 import { useAuth } from "@/lib/store";
 import logo from "@/assets/logo.png";
 import {
@@ -12,6 +12,7 @@ const items = [
   { title: "Invoices", url: "/invoices", icon: FileText },
   { title: "Create Invoice", url: "/invoices/new", icon: FilePlus2 },
   { title: "Customers", url: "/customers", icon: Users },
+  { title: "Users", url: "/users", icon: UserCog },
   { title: "Company", url: "/company", icon: Building2 },
 ];
 
