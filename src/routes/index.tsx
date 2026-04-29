@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Receipt, Lock } from "lucide-react";
+import { Lock } from "lucide-react";
+import logo from "@/assets/logo.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -41,9 +42,7 @@ function LoginPage() {
     <div className="min-h-screen flex items-center justify-center p-4 bg-[radial-gradient(ellipse_at_top,oklch(0.94_0.05_265),transparent_50%),radial-gradient(ellipse_at_bottom,oklch(0.95_0.04_290),transparent_50%)]">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary-glow shadow-elegant">
-            <Receipt className="h-7 w-7 text-primary-foreground" />
-          </div>
+          <img src={logo} alt="Billwise logo" className="mx-auto mb-4 h-14 w-14 object-contain" />
           <h1 className="text-3xl font-bold tracking-tight">Billwise</h1>
           <p className="text-sm text-muted-foreground mt-1">Invoice billing, beautifully simple</p>
         </div>

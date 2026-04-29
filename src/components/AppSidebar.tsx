@@ -1,6 +1,7 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { LayoutDashboard, Building2, Users, FileText, FilePlus2, LogOut, Receipt } from "lucide-react";
+import { LayoutDashboard, Building2, Users, FileText, FilePlus2, LogOut } from "lucide-react";
 import { useAuth } from "@/lib/store";
+import logo from "@/assets/logo.png";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, SidebarFooter,
@@ -23,9 +24,7 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border">
         <Link to="/dashboard" className="flex items-center gap-2 px-2 py-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-glow shadow-elegant">
-            <Receipt className="h-5 w-5 text-primary-foreground" />
-          </div>
+          <img src={logo} alt="Billwise logo" className="h-9 w-9 rounded-lg object-contain" />
           <div className="group-data-[collapsible=icon]:hidden">
             <div className="text-sm font-semibold text-sidebar-foreground">Billwise</div>
             <div className="text-xs text-sidebar-foreground/60">Invoice Suite</div>
