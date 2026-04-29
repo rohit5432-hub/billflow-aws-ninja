@@ -30,14 +30,18 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Apoyphe — Invoice Suite" },
+      { title: "Billwise — Invoice Suite" },
       { name: "description", content: "Modern invoice billing with GST, multi-currency and PDF export." },
-      { name: "author", content: "Apoyphe" },
-      { property: "og:title", content: "Apoyphe — Invoice Suite" },
+      { name: "author", content: "Billwise" },
+      { property: "og:title", content: "Billwise — Invoice Suite" },
       { property: "og:description", content: "Modern invoice billing with GST, multi-currency and PDF export." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Billwise — Invoice Suite" },
+      { name: "twitter:description", content: "Modern invoice billing with GST, multi-currency and PDF export." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/699ce957-c1cf-44bb-ba85-ac9cc6c17809/id-preview-78c07c2d--6cae898c-194b-4ae2-a88a-7ba2ecd48be7.lovable.app-1777469648050.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/699ce957-c1cf-44bb-ba85-ac9cc6c17809/id-preview-78c07c2d--6cae898c-194b-4ae2-a88a-7ba2ecd48be7.lovable.app-1777469648050.png" },
     ],
     links: [
       {
