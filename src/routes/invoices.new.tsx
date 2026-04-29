@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useData, type Invoice } from "@/lib/store";
+import { useData, type Invoice, type GstType } from "@/lib/store";
 import { getUsdToInr, formatINR } from "@/lib/fx";
 import { toast } from "sonner";
 import { FilePlus2 } from "lucide-react";
@@ -29,6 +29,7 @@ function NewInvoice() {
   const [amount, setAmount] = useState("");
   const [currency, setCurrency] = useState<"INR" | "USD">("INR");
   const [gstRate, setGstRate] = useState<5 | 12 | 18>(18);
+  const [gstType, setGstType] = useState<GstType>("CGST_SGST");
   const [invoiceDate, setInvoiceDate] = useState(today);
   const [dueDate, setDueDate] = useState(due);
   const [status, setStatus] = useState<"paid" | "pending">("pending");
@@ -52,7 +53,7 @@ function NewInvoice() {
     const inv: Omit<Invoice, "id" | "number"> = {
       customerId, amount: calc.inr, originalAmount: calc.orig, currency,
       fxRate: currency === "USD" ? fxRate : 1,
-      gstRate, gstAmount: calc.gstAmount, total: calc.total,
+      gstRate, gstType, gstAmount: calc.gstAmount, total: calc.total,
       status, invoiceDate, dueDate,
     };
     const created = addInvoice(inv);
@@ -92,14 +93,27 @@ function NewInvoice() {
             <p className="text-xs text-muted-foreground -mt-2">Live rate: 1 USD = ₹{fxRate.toFixed(2)}</p>
           )}
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label>GST</Label>
+              <Label>GST Rate</Label>
               <Select value={String(gstRate)} onValueChange={(v) => setGstRate(Number(v) as 5 | 12 | 18)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent><SelectItem value="5">5%</SelectItem><SelectItem value="12">12%</SelectItem><SelectItem value="18">18%</SelectItem></SelectContent>
               </Select>
             </div>
+            <div className="space-y-2">
+              <Label>GST Type</Label>
+              <Select value={gstType} onValueChange={(v) => setGstType(v as GstType)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="CGST_SGST">CGST + SGST (intra-state)</SelectItem>
+                  <SelectItem value="IGST">IGST (inter-state)</SelectItem>
+                  <SelectItem value="CGST_UTGST">CGST + UTGST (union territory)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2"><Label>Invoice Date</Label><Input type="date" value={invoiceDate} onChange={(e) => setInvoiceDate(e.target.value)} /></div>
             <div className="space-y-2"><Label>Due Date</Label><Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} /></div>
           </div>
