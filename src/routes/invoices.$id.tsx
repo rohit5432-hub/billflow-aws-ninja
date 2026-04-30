@@ -147,7 +147,7 @@ function InvoicePreview() {
         </Button>
       </div>
 
-      <Card className="p-6 max-w-4xl mx-auto shadow-elegant border-2 border-foreground/80 text-foreground bg-background text-[12px] leading-snug">
+      <Card ref={printRef} className="p-6 max-w-4xl mx-auto shadow-elegant border-2 border-foreground/80 text-foreground bg-background text-[12px] leading-snug">
         <h2 className="text-center text-xl font-bold tracking-wide mb-3">TAX INVOICE</h2>
 
         {/* Header grid */}
