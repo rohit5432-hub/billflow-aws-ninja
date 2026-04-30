@@ -178,26 +178,27 @@ export const useData = create<DataState>()(
         const iso = (offset = 0) =>
           new Date(today.getTime() + offset * 86400000).toISOString().slice(0, 10);
 
-        // Company
+        // Company — matches the reference Tally PDF (Apoyphe seller)
         set({
           company: {
-            name: "Apoyphe Software Services Private Limited",
+            name: "Apoyphe Software Services Pvt Ltd",
             email: "billing@apoyphe.com",
             phone: "+91 99489 03222",
-            gstin: "36ABCDE1234F1Z5",
+            gstin: "36AAXCA4173C1ZI",
             address:
-              "4th Floor, Ayyappa Society, 467, Gouri Shankara Nilayam,\nMadhapur, Telangana 500081",
+              "#467, 4th Floor, Ayyappa Society,\nMadhapur, Hyderabad - 500081.\nState: Telangana, Code: 36",
           },
         });
 
-        // 3 customers covering intra-state, inter-state, UT
+        // 3 customers — first one matches the reference PDF (Sumax Engineering)
         const customers: Customer[] = [
           {
             id: crypto.randomUUID(),
-            name: "Hyderabad Tech Pvt Ltd",
-            gstin: "36AAACH1234J1Z2",
-            email: "ap@hyderabadtech.in",
-            address: "Plot 12, HITEC City,\nHyderabad, Telangana 500081",
+            name: "Sumax Engineering Pvt Ltd",
+            gstin: "36AAQCS1234M1Z7",
+            email: "accounts@sumaxengineering.com",
+            address:
+              "Plot No. 45, Phase-II, IDA Cherlapally,\nHyderabad - 500051.\nState: Telangana, Code: 36",
           },
           {
             id: crypto.randomUUID(),
