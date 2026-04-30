@@ -44,7 +44,7 @@ function InvoicePreview() {
   const { id } = Route.useParams();
   const invoice = useData((s) => s.invoices.find((i) => i.id === id));
   const customer = useData((s) => s.customers.find((c) => c.id === invoice?.customerId));
-
+  const printRef = useRef<HTMLDivElement>(null);
   if (!invoice || !customer) {
     return (
       <AppLayout title="Invoice">
