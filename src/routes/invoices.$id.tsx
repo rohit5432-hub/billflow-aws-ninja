@@ -4,8 +4,9 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useData } from "@/lib/store";
 import { numberToWordsINR } from "@/lib/fx";
-import { SELLER, BANK, TERMS, SIGNATORY, JURISDICTION } from "@/lib/seller";
+import { SELLER, BANK, TERMS, JURISDICTION } from "@/lib/seller";
 import { Download, ArrowLeft } from "lucide-react";
+import logoUrl from "@/assets/apoyphe-logo.jpg";
 
 
 export const Route = createFileRoute("/invoices/$id")({
