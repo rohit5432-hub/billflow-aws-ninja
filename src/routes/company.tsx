@@ -19,11 +19,11 @@ function CompanyPage() {
   const company = useData((s) => s.company);
   const setCompany = useData((s) => s.setCompany);
   const defaults = {
-    name: "Apoyphe Software Services Private Limited",
-    email: "",
+    name: "Apoyphe Software Services Pvt Ltd",
+    email: "billing@apoyphe.com",
     phone: "+91 99489 03222",
-    gstin: "36ABCDE1234F1Z5",
-    address: "4th Floor, Ayyappa Society, 467, Gouri Shankara Nilayam,\nMadhapur, Telangana 500081",
+    gstin: "36AAXCA4173C1ZI",
+    address: "#467, 4th Floor, Ayyappa Society,\nMadhapur, Hyderabad - 500081.\nState: Telangana, Code: 36",
   };
   const [form, setForm] = useState(defaults);
 
