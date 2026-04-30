@@ -433,12 +433,6 @@ function InvoicePreview() {
       const wrapped = doc.splitTextToSize(`${i + 1}. ${t}`, halfW - 12);
       doc.text(wrapped, M + 6, y + 26 + i * 16);
     });
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
-    doc.text(SIGNATORY, M + halfW + 6, y + termsH - 22);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.text("Authorised Signatory", M + halfW + 6, y + termsH - 8);
     y += termsH + 4;
 
     // ====== Footer ======
