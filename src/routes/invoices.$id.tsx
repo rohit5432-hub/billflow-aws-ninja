@@ -4,8 +4,9 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useData } from "@/lib/store";
 import { numberToWordsINR } from "@/lib/fx";
-import { SELLER, BANK, TERMS, SIGNATORY, JURISDICTION } from "@/lib/seller";
+import { SELLER, BANK, TERMS, JURISDICTION } from "@/lib/seller";
 import { Download, ArrowLeft } from "lucide-react";
+import logoUrl from "@/assets/apoyphe-logo.jpg";
 
 
 export const Route = createFileRoute("/invoices/$id")({
@@ -71,6 +72,18 @@ function InvoicePreview() {
   // ---------------------------- PDF generation ---------------------------- //
   const downloadPDF = async () => {
     const { default: jsPDF } = await import("jspdf");
+    // Load logo as data URL for embedding
+    const logoDataUrl = await fetch(logoUrl)
+      .then((r) => r.blob())
+      .then(
+        (b) =>
+          new Promise<string>((resolve) => {
+            const fr = new FileReader();
+            fr.onload = () => resolve(fr.result as string);
+            fr.readAsDataURL(b);
+          })
+      )
+      .catch(() => "");
     const doc = new jsPDF({ unit: "pt", format: "a4" });
     const W = doc.internal.pageSize.getWidth();
     const H = doc.internal.pageSize.getHeight();
@@ -123,10 +136,19 @@ function InvoicePreview() {
     // Vertical split inside meta
     doc.line(M + headerLeftW + metaColW, y, M + headerLeftW + metaColW, y + headerH);
 
-    // Seller block
+    // Seller block — with logo on the left
+    const logoSize = 36;
+    const logoPad = 6;
+    let textX = M + 6;
+    if (logoDataUrl) {
+      try {
+        doc.addImage(logoDataUrl, "JPEG", M + 6, y + 6, logoSize, logoSize);
+        textX = M + 6 + logoSize + logoPad;
+      } catch {}
+    }
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
-    doc.text(SELLER.name, M + 6, y + 14);
+    doc.text(SELLER.name, textX, y + 14);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
     const sellerLines = [
@@ -136,8 +158,8 @@ function InvoicePreview() {
       `Email: ${SELLER.email}   Phone: ${SELLER.phone}`,
     ];
     sellerLines.forEach((l, i) => {
-      const wrapped = doc.splitTextToSize(l, headerLeftW - 12);
-      doc.text(wrapped, M + 6, y + 28 + i * 12);
+      const wrapped = doc.splitTextToSize(l, headerLeftW - (textX - M) - 6);
+      doc.text(wrapped, textX, y + 28 + i * 12);
     });
 
     // Meta cells
@@ -411,12 +433,6 @@ function InvoicePreview() {
       const wrapped = doc.splitTextToSize(`${i + 1}. ${t}`, halfW - 12);
       doc.text(wrapped, M + 6, y + 26 + i * 16);
     });
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
-    doc.text(SIGNATORY, M + halfW + 6, y + termsH - 22);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.text("Authorised Signatory", M + halfW + 6, y + termsH - 8);
     y += termsH + 4;
 
     // ====== Footer ======
@@ -651,10 +667,6 @@ function InvoicePreview() {
           </div>
           <div className="p-2 flex flex-col justify-between">
             <p className="font-bold text-right">for {SELLER.name}</p>
-            <div className="text-right mt-8">
-              <p className="font-bold">{SIGNATORY}</p>
-              <p>Authorised Signatory</p>
-            </div>
           </div>
         </div>
 
