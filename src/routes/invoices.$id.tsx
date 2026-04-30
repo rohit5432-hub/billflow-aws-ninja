@@ -6,7 +6,7 @@ import { useData } from "@/lib/store";
 import { numberToWordsINR } from "@/lib/fx";
 import { SELLER, BANK, TERMS, JURISDICTION } from "@/lib/seller";
 import { Download, ArrowLeft } from "lucide-react";
-import logoUrl from "@/assets/apoyphe-logo.jpg";
+import logoUrl from "@/assets/apoyphe-logo-black.png";
 
 
 export const Route = createFileRoute("/invoices/$id")({
@@ -142,7 +142,7 @@ function InvoicePreview() {
     let textX = M + 6;
     if (logoDataUrl) {
       try {
-        doc.addImage(logoDataUrl, "JPEG", M + 6, y + 6, logoSize, logoSize);
+        doc.addImage(logoDataUrl, "PNG", M + 6, y + 6, logoSize, logoSize);
         textX = M + 6 + logoSize + logoPad;
       } catch {}
     }
@@ -155,7 +155,6 @@ function InvoicePreview() {
       SELLER.address,
       `GSTIN: ${SELLER.gstin}`,
       `State Name: ${SELLER.stateName}, Code: ${SELLER.stateCode}`,
-      `Email: ${SELLER.email}   Phone: ${SELLER.phone}`,
     ];
     sellerLines.forEach((l, i) => {
       const wrapped = doc.splitTextToSize(l, headerLeftW - (textX - M) - 6);
@@ -470,13 +469,14 @@ function InvoicePreview() {
 
         {/* Header grid */}
         <div className="grid grid-cols-[1.2fr_1fr] border border-foreground/80">
-          <div className="p-2 border-r border-foreground/80">
-            <p className="font-bold text-[13px]">{SELLER.name}</p>
-            <p className="whitespace-pre-line">{SELLER.address}</p>
-            <p>GSTIN: {SELLER.gstin}</p>
-            <p>State Name: {SELLER.stateName}, Code: {SELLER.stateCode}</p>
-            <p>Email: {SELLER.email}</p>
-            <p>Phone: {SELLER.phone}</p>
+          <div className="p-2 border-r border-foreground/80 flex gap-3 items-start">
+            <img src={logoUrl} alt="Apoyphe logo" className="h-12 w-12 object-contain shrink-0" />
+            <div className="min-w-0">
+              <p className="font-bold text-[13px]">{SELLER.name}</p>
+              <p className="whitespace-pre-line">{SELLER.address}</p>
+              <p>GSTIN: {SELLER.gstin}</p>
+              <p>State Name: {SELLER.stateName}, Code: {SELLER.stateCode}</p>
+            </div>
           </div>
           <div className="grid grid-cols-2 grid-rows-3">
             {[
