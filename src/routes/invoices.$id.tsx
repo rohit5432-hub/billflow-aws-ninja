@@ -667,10 +667,6 @@ function InvoicePreview() {
           </div>
           <div className="p-2 flex flex-col justify-between">
             <p className="font-bold text-right">for {SELLER.name}</p>
-            <div className="text-right mt-8">
-              <p className="font-bold">{SIGNATORY}</p>
-              <p>Authorised Signatory</p>
-            </div>
           </div>
         </div>
 
