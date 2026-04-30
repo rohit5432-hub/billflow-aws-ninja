@@ -6,7 +6,7 @@ import { useData } from "@/lib/store";
 import { numberToWordsINR } from "@/lib/fx";
 import { SELLER, BANK, TERMS, SIGNATORY, JURISDICTION } from "@/lib/seller";
 import { Download, ArrowLeft } from "lucide-react";
-import jsPDF from "jspdf";
+
 
 export const Route = createFileRoute("/invoices/$id")({
   head: () => ({ meta: [{ title: "Tax Invoice — Apoyphe" }] }),
@@ -69,7 +69,8 @@ function InvoicePreview() {
   const consigneeSame = invoice.consigneeSameAsBuyer ?? true;
 
   // ---------------------------- PDF generation ---------------------------- //
-  const downloadPDF = () => {
+  const downloadPDF = async () => {
+    const { default: jsPDF } = await import("jspdf");
     const doc = new jsPDF({ unit: "pt", format: "a4" });
     const W = doc.internal.pageSize.getWidth();
     const H = doc.internal.pageSize.getHeight();
