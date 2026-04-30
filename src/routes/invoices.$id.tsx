@@ -72,6 +72,18 @@ function InvoicePreview() {
   // ---------------------------- PDF generation ---------------------------- //
   const downloadPDF = async () => {
     const { default: jsPDF } = await import("jspdf");
+    // Load logo as data URL for embedding
+    const logoDataUrl = await fetch(logoUrl)
+      .then((r) => r.blob())
+      .then(
+        (b) =>
+          new Promise<string>((resolve) => {
+            const fr = new FileReader();
+            fr.onload = () => resolve(fr.result as string);
+            fr.readAsDataURL(b);
+          })
+      )
+      .catch(() => "");
     const doc = new jsPDF({ unit: "pt", format: "a4" });
     const W = doc.internal.pageSize.getWidth();
     const H = doc.internal.pageSize.getHeight();
@@ -124,10 +136,19 @@ function InvoicePreview() {
     // Vertical split inside meta
     doc.line(M + headerLeftW + metaColW, y, M + headerLeftW + metaColW, y + headerH);
 
-    // Seller block
+    // Seller block — with logo on the left
+    const logoSize = 36;
+    const logoPad = 6;
+    let textX = M + 6;
+    if (logoDataUrl) {
+      try {
+        doc.addImage(logoDataUrl, "JPEG", M + 6, y + 6, logoSize, logoSize);
+        textX = M + 6 + logoSize + logoPad;
+      } catch {}
+    }
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
-    doc.text(SELLER.name, M + 6, y + 14);
+    doc.text(SELLER.name, textX, y + 14);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
     const sellerLines = [
@@ -137,8 +158,8 @@ function InvoicePreview() {
       `Email: ${SELLER.email}   Phone: ${SELLER.phone}`,
     ];
     sellerLines.forEach((l, i) => {
-      const wrapped = doc.splitTextToSize(l, headerLeftW - 12);
-      doc.text(wrapped, M + 6, y + 28 + i * 12);
+      const wrapped = doc.splitTextToSize(l, headerLeftW - (textX - M) - 6);
+      doc.text(wrapped, textX, y + 28 + i * 12);
     });
 
     // Meta cells
