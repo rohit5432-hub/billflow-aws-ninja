@@ -9,7 +9,6 @@ import { SELLER, BANK, TERMS, JURISDICTION } from "@/lib/seller";
 import { Download, ArrowLeft } from "lucide-react";
 import logoUrl from "@/assets/apoyphe-logo-black.png";
 
-
 export const Route = createFileRoute("/invoices/$id")({
   head: () => ({ meta: [{ title: "Tax Invoice — Apoyphe" }] }),
   component: InvoicePreview,
@@ -135,8 +134,14 @@ function InvoicePreview() {
           ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
           ctx.drawImage(
             canvas,
-            0, renderedPx, canvas.width, sliceHeightPx,
-            0, 0, canvas.width, sliceHeightPx
+            0,
+            renderedPx,
+            canvas.width,
+            sliceHeightPx,
+            0,
+            0,
+            canvas.width,
+            sliceHeightPx,
           );
           const sliceH = sliceHeightPx / pxPerPt;
           if (renderedPx > 0) pdf.addPage();
@@ -171,7 +176,10 @@ function InvoicePreview() {
         </Button>
       </div>
 
-      <Card ref={printRef} className="p-6 max-w-4xl mx-auto shadow-elegant border-2 border-foreground/80 text-foreground bg-background text-[12px] leading-snug">
+      <Card
+        ref={printRef}
+        className="p-6 max-w-4xl mx-auto shadow-elegant border-2 border-foreground/80 text-foreground bg-background text-[12px] leading-snug"
+      >
         <h2 className="text-center text-xl font-bold tracking-wide mb-3">TAX INVOICE</h2>
 
         {/* Header grid */}
@@ -182,7 +190,9 @@ function InvoicePreview() {
               <p className="font-bold text-[13px]">{SELLER.name}</p>
               <p className="whitespace-pre-line">{SELLER.address}</p>
               <p>GSTIN: {SELLER.gstin}</p>
-              <p>State Name: {SELLER.stateName}, Code: {SELLER.stateCode}</p>
+              <p>
+                State Name: {SELLER.stateName}, Code: {SELLER.stateCode}
+              </p>
             </div>
           </div>
           <div className="grid grid-cols-2 grid-rows-3">
@@ -227,7 +237,9 @@ function InvoicePreview() {
           <thead>
             <tr className="border-b border-foreground/80 bg-muted/30 text-[11px]">
               <th className="border-r border-foreground/80 px-1 py-1 w-8">Sl</th>
-              <th className="border-r border-foreground/80 px-2 py-1 text-left">Description of Services</th>
+              <th className="border-r border-foreground/80 px-2 py-1 text-left">
+                Description of Services
+              </th>
               <th className="border-r border-foreground/80 px-1 py-1 w-16">HSN/SAC</th>
               <th className="border-r border-foreground/80 px-1 py-1 w-12">GST</th>
               <th className="border-r border-foreground/80 px-1 py-1 w-10">Qty</th>
@@ -237,11 +249,31 @@ function InvoicePreview() {
           </thead>
           <tbody>
             <tr>
-              <td rowSpan={6 + (invoice.subItems?.length ?? 0) + (roundOff ? 1 : 0)} className="border-r border-foreground/80 text-center align-top py-1">1</td>
+              <td
+                rowSpan={6 + (invoice.subItems?.length ?? 0) + (roundOff ? 1 : 0)}
+                className="border-r border-foreground/80 text-center align-top py-1"
+              >
+                1
+              </td>
               <td className="px-2 py-1 font-bold">{invoice.serviceTitle || "Services rendered"}</td>
-              <td rowSpan={6 + (invoice.subItems?.length ?? 0) + (roundOff ? 1 : 0)} className="border-l border-r border-foreground/80 text-center align-top py-1">{invoice.hsnCode || "—"}</td>
-              <td rowSpan={6 + (invoice.subItems?.length ?? 0) + (roundOff ? 1 : 0)} className="border-r border-foreground/80 text-center align-top py-1">{invoice.gstRate}%</td>
-              <td rowSpan={6 + (invoice.subItems?.length ?? 0) + (roundOff ? 1 : 0)} className="border-r border-foreground/80 text-center align-top py-1">1</td>
+              <td
+                rowSpan={6 + (invoice.subItems?.length ?? 0) + (roundOff ? 1 : 0)}
+                className="border-l border-r border-foreground/80 text-center align-top py-1"
+              >
+                {invoice.hsnCode || "—"}
+              </td>
+              <td
+                rowSpan={6 + (invoice.subItems?.length ?? 0) + (roundOff ? 1 : 0)}
+                className="border-r border-foreground/80 text-center align-top py-1"
+              >
+                {invoice.gstRate}%
+              </td>
+              <td
+                rowSpan={6 + (invoice.subItems?.length ?? 0) + (roundOff ? 1 : 0)}
+                className="border-r border-foreground/80 text-center align-top py-1"
+              >
+                1
+              </td>
               <td className="px-2 py-1 text-right font-bold">{fmt(subtotal)}</td>
               <td className="px-2 py-1 text-right font-bold">{fmt(subtotal)}</td>
             </tr>
@@ -252,33 +284,47 @@ function InvoicePreview() {
                 <td className="px-2 py-0.5 text-right">{fmt(s.amount)}</td>
               </tr>
             ))}
-            <tr><td colSpan={3} className="py-1"></td></tr>
+            <tr>
+              <td colSpan={3} className="py-1"></td>
+            </tr>
             {isIgst ? (
               <tr>
-                <td className="px-2 py-0.5 text-right italic" colSpan={2}>IGST</td>
+                <td className="px-2 py-0.5 text-right italic" colSpan={2}>
+                  IGST
+                </td>
                 <td className="px-2 py-0.5 text-right">{fmt(invoice.gstAmount)}</td>
               </tr>
             ) : (
               <>
                 <tr>
-                  <td className="px-2 py-0.5 text-right italic" colSpan={2}>CGST</td>
+                  <td className="px-2 py-0.5 text-right italic" colSpan={2}>
+                    CGST
+                  </td>
                   <td className="px-2 py-0.5 text-right">{fmt(halfTax)}</td>
                 </tr>
                 <tr>
-                  <td className="px-2 py-0.5 text-right italic" colSpan={2}>{utLabel}</td>
+                  <td className="px-2 py-0.5 text-right italic" colSpan={2}>
+                    {utLabel}
+                  </td>
                   <td className="px-2 py-0.5 text-right">{fmt(halfTax)}</td>
                 </tr>
               </>
             )}
             {roundOff !== 0 && (
               <tr>
-                <td className="px-2 py-0.5 text-right italic" colSpan={2}>Round Off</td>
-                <td className="px-2 py-0.5 text-right">{roundOff < 0 ? `(-) ${fmt(Math.abs(roundOff))}` : fmt(roundOff)}</td>
+                <td className="px-2 py-0.5 text-right italic" colSpan={2}>
+                  Round Off
+                </td>
+                <td className="px-2 py-0.5 text-right">
+                  {roundOff < 0 ? `(-) ${fmt(Math.abs(roundOff))}` : fmt(roundOff)}
+                </td>
               </tr>
             )}
             <tr className="border-t border-foreground/80 font-bold">
               <td className="px-2 py-1 text-right">Total</td>
-              <td className="border-l border-foreground/80 text-center py-1" colSpan={2}>1 nos</td>
+              <td className="border-l border-foreground/80 text-center py-1" colSpan={2}>
+                1 nos
+              </td>
               <td className="px-2 py-1 text-right">₹ {fmt(grandTotal)}</td>
             </tr>
           </tbody>
@@ -295,18 +341,32 @@ function InvoicePreview() {
         <table className="w-full border-x border-b border-foreground/80 border-collapse text-[11px]">
           <thead>
             <tr className="bg-muted/30">
-              <th className="border border-foreground/80 px-1 py-1" rowSpan={2}>HSN/SAC</th>
-              <th className="border border-foreground/80 px-1 py-1" rowSpan={2}>Taxable Value</th>
+              <th className="border border-foreground/80 px-1 py-1" rowSpan={2}>
+                HSN/SAC
+              </th>
+              <th className="border border-foreground/80 px-1 py-1" rowSpan={2}>
+                Taxable Value
+              </th>
               {isIgst ? (
                 <>
-                  <th className="border border-foreground/80 px-1 py-1" colSpan={2}>Integrated Tax</th>
-                  <th className="border border-foreground/80 px-1 py-1" rowSpan={2}>Total Tax</th>
+                  <th className="border border-foreground/80 px-1 py-1" colSpan={2}>
+                    Integrated Tax
+                  </th>
+                  <th className="border border-foreground/80 px-1 py-1" rowSpan={2}>
+                    Total Tax
+                  </th>
                 </>
               ) : (
                 <>
-                  <th className="border border-foreground/80 px-1 py-1" colSpan={2}>Central Tax</th>
-                  <th className="border border-foreground/80 px-1 py-1" colSpan={2}>State Tax</th>
-                  <th className="border border-foreground/80 px-1 py-1" rowSpan={2}>Total Tax</th>
+                  <th className="border border-foreground/80 px-1 py-1" colSpan={2}>
+                    Central Tax
+                  </th>
+                  <th className="border border-foreground/80 px-1 py-1" colSpan={2}>
+                    State Tax
+                  </th>
+                  <th className="border border-foreground/80 px-1 py-1" rowSpan={2}>
+                    Total Tax
+                  </th>
                 </>
               )}
             </tr>
@@ -323,36 +383,53 @@ function InvoicePreview() {
           </thead>
           <tbody>
             <tr>
-              <td className="border border-foreground/80 text-center px-1 py-1">{invoice.hsnCode || "—"}</td>
+              <td className="border border-foreground/80 text-center px-1 py-1">
+                {invoice.hsnCode || "—"}
+              </td>
               <td className="border border-foreground/80 text-right px-1 py-1">{fmt(subtotal)}</td>
-              <td className="border border-foreground/80 text-center px-1 py-1">{isIgst ? invoice.gstRate : halfRate}%</td>
-              <td className="border border-foreground/80 text-right px-1 py-1">{fmt(isIgst ? invoice.gstAmount : halfTax)}</td>
+              <td className="border border-foreground/80 text-center px-1 py-1">
+                {isIgst ? invoice.gstRate : halfRate}%
+              </td>
+              <td className="border border-foreground/80 text-right px-1 py-1">
+                {fmt(isIgst ? invoice.gstAmount : halfTax)}
+              </td>
               {!isIgst && (
                 <>
                   <td className="border border-foreground/80 text-center px-1 py-1">{halfRate}%</td>
-                  <td className="border border-foreground/80 text-right px-1 py-1">{fmt(halfTax)}</td>
+                  <td className="border border-foreground/80 text-right px-1 py-1">
+                    {fmt(halfTax)}
+                  </td>
                 </>
               )}
-              <td className="border border-foreground/80 text-right px-1 py-1">{fmt(invoice.gstAmount)}</td>
+              <td className="border border-foreground/80 text-right px-1 py-1">
+                {fmt(invoice.gstAmount)}
+              </td>
             </tr>
             <tr className="font-bold">
               <td className="border border-foreground/80 text-center px-1 py-1">Total</td>
               <td className="border border-foreground/80 text-right px-1 py-1">{fmt(subtotal)}</td>
               <td className="border border-foreground/80 px-1 py-1"></td>
-              <td className="border border-foreground/80 text-right px-1 py-1">{fmt(isIgst ? invoice.gstAmount : halfTax)}</td>
+              <td className="border border-foreground/80 text-right px-1 py-1">
+                {fmt(isIgst ? invoice.gstAmount : halfTax)}
+              </td>
               {!isIgst && (
                 <>
                   <td className="border border-foreground/80 px-1 py-1"></td>
-                  <td className="border border-foreground/80 text-right px-1 py-1">{fmt(halfTax)}</td>
+                  <td className="border border-foreground/80 text-right px-1 py-1">
+                    {fmt(halfTax)}
+                  </td>
                 </>
               )}
-              <td className="border border-foreground/80 text-right px-1 py-1">{fmt(invoice.gstAmount)}</td>
+              <td className="border border-foreground/80 text-right px-1 py-1">
+                {fmt(invoice.gstAmount)}
+              </td>
             </tr>
           </tbody>
         </table>
 
         <p className="px-1 py-2 text-[11px]">
-          Tax Amount (in words): <span className="font-bold">{tinyAmountInWords(invoice.gstAmount)}</span>
+          Tax Amount (in words):{" "}
+          <span className="font-bold">{tinyAmountInWords(invoice.gstAmount)}</span>
         </p>
 
         {/* Bank */}
@@ -369,7 +446,9 @@ function InvoicePreview() {
           <div className="p-2 border-r border-foreground/80">
             <p className="font-bold">Terms and Conditions:</p>
             <ol className="list-decimal pl-4 space-y-0.5 mt-1">
-              {TERMS.map((t, i) => <li key={i}>{t}</li>)}
+              {TERMS.map((t, i) => (
+                <li key={i}>{t}</li>
+              ))}
             </ol>
           </div>
           <div className="p-2 flex flex-col justify-between">
@@ -378,7 +457,9 @@ function InvoicePreview() {
         </div>
 
         <p className="text-center font-bold mt-2">{JURISDICTION}</p>
-        <p className="text-center italic text-[10px] text-muted-foreground">This is a Computer Generated Invoice</p>
+        <p className="text-center italic text-[10px] text-muted-foreground">
+          This is a Computer Generated Invoice
+        </p>
       </Card>
     </AppLayout>
   );
