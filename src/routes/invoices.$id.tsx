@@ -71,379 +71,61 @@ function InvoicePreview() {
   const consigneeSame = invoice.consigneeSameAsBuyer ?? true;
 
   // ---------------------------- PDF generation ---------------------------- //
+  // Capture the on-screen invoice card to ensure the downloaded PDF
+  // matches the preview structure exactly.
   const downloadPDF = async () => {
-    const { default: jsPDF } = await import("jspdf");
-    // Load logo as data URL for embedding
-    const logoDataUrl = await fetch(logoUrl)
-      .then((r) => r.blob())
-      .then(
-        (b) =>
-          new Promise<string>((resolve) => {
-            const fr = new FileReader();
-            fr.onload = () => resolve(fr.result as string);
-            fr.readAsDataURL(b);
-          })
-      )
-      .catch(() => "");
-    const doc = new jsPDF({ unit: "pt", format: "a4" });
-    const W = doc.internal.pageSize.getWidth();
-    const H = doc.internal.pageSize.getHeight();
-    const M = 30; // page margin
-    const innerW = W - M * 2;
-    let y = M;
+    const el = printRef.current;
+    if (!el) return;
+    const [{ default: jsPDF }, { default: html2canvas }] = await Promise.all([
+      import("jspdf"),
+      import("html2canvas"),
+    ]);
 
-    // Outer border
-    doc.setDrawColor(0);
-    doc.setLineWidth(0.8);
-
-    // Helper: draw text within a cell with optional alignment & bold
-    const cell = (
-      text: string | string[],
-      x: number,
-      yy: number,
-      w: number,
-      opts: { align?: "left" | "right" | "center"; bold?: boolean; size?: number; italic?: boolean; pad?: number } = {}
-    ) => {
-      const { align = "left", bold = false, size = 9, italic = false, pad = 4 } = opts;
-      doc.setFont("helvetica", bold ? (italic ? "bolditalic" : "bold") : italic ? "italic" : "normal");
-      doc.setFontSize(size);
-      const lines = Array.isArray(text) ? text : doc.splitTextToSize(text, w - pad * 2);
-      const tx = align === "right" ? x + w - pad : align === "center" ? x + w / 2 : x + pad;
-      doc.text(lines, tx, yy + size, { align });
-      return lines.length * (size + 2);
-    };
-
-    // ====== Title bar ======
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(14);
-    doc.text("TAX INVOICE", W / 2, y + 14, { align: "center" });
-    y += 22;
-
-    // ====== Header grid: Seller (left, spans 2 rows) | Invoice meta (right, 3 rows of 2) ======
-    const headerLeftW = innerW * 0.55;
-    const headerRightW = innerW - headerLeftW;
-    const metaColW = headerRightW / 2;
-    const metaRowH = 28;
-    const headerH = metaRowH * 3;
-
-    // Outer header rectangle
-    doc.rect(M, y, innerW, headerH);
-    // Vertical split between seller and meta
-    doc.line(M + headerLeftW, y, M + headerLeftW, y + headerH);
-    // Horizontal lines for meta rows
-    for (let i = 1; i < 3; i++) {
-      doc.line(M + headerLeftW, y + i * metaRowH, M + innerW, y + i * metaRowH);
-    }
-    // Vertical split inside meta
-    doc.line(M + headerLeftW + metaColW, y, M + headerLeftW + metaColW, y + headerH);
-
-    // Seller block — with logo on the left
-    const logoSize = 36;
-    const logoPad = 6;
-    let textX = M + 6;
-    if (logoDataUrl) {
-      try {
-        doc.addImage(logoDataUrl, "PNG", M + 6, y + 6, logoSize, logoSize);
-        textX = M + 6 + logoSize + logoPad;
-      } catch {}
-    }
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(11);
-    doc.text(SELLER.name, textX, y + 14);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    const sellerLines = [
-      SELLER.address,
-      `GSTIN: ${SELLER.gstin}`,
-      `State Name: ${SELLER.stateName}, Code: ${SELLER.stateCode}`,
-    ];
-    sellerLines.forEach((l, i) => {
-      const wrapped = doc.splitTextToSize(l, headerLeftW - (textX - M) - 6);
-      doc.text(wrapped, textX, y + 28 + i * 12);
+    const canvas = await html2canvas(el, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff",
     });
 
-    // Meta cells
-    const metaCell = (label: string, value: string, col: 0 | 1, row: 0 | 1 | 2) => {
-      const cx = M + headerLeftW + col * metaColW;
-      const cy = y + row * metaRowH;
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(8);
-      doc.text(label, cx + 4, cy + 9);
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(10);
-      doc.text(value || "—", cx + 4, cy + 22);
-    };
-    metaCell("Invoice No.", invoice.number, 0, 0);
-    metaCell("Dated", fmtDate(invoice.invoiceDate), 1, 0);
-    metaCell("Reference No. & Date", invoice.referenceNo || "—", 0, 1);
-    metaCell("Mode/Terms of Payment", invoice.paymentTerms || `Due ${fmtDate(invoice.dueDate)}`, 1, 1);
-    metaCell("Buyer's Order No.", invoice.buyersOrderNo || "—", 0, 2);
-    metaCell("Other References", invoice.status.toUpperCase(), 1, 2);
+    const pdf = new jsPDF({ unit: "pt", format: "a4", orientation: "portrait" });
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
+    const margin = 20;
+    const contentW = pageW - margin * 2;
+    const contentH = pageH - margin * 2;
 
-    y += headerH;
+    const imgW = contentW;
+    const imgH = (canvas.height * imgW) / canvas.width;
 
-    // ====== Buyer / Consignee ======
-    const bcH = 96;
-    const halfW = innerW / 2;
-    doc.rect(M, y, innerW, bcH);
-    doc.line(M + halfW, y, M + halfW, y + bcH);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    doc.text("Buyer (Bill to)", M + 6, y + 10);
-    doc.text("Consignee (Ship to)", M + halfW + 6, y + 10);
-
-    const drawParty = (x: number) => {
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(11);
-      doc.text(customer.name, x + 6, y + 24);
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(9);
-      const lines = [
-        ...customer.address.split("\n"),
-        customer.gstin ? `GSTIN/UIN: ${customer.gstin}` : "",
-        `State Name: ${invoice.placeOfSupply || SELLER.stateName}, Code: 36`,
-        `Place of Supply: ${invoice.placeOfSupply || SELLER.stateName}`,
-      ].filter(Boolean);
-      lines.forEach((l, i) => {
-        const wrapped = doc.splitTextToSize(l, halfW - 12);
-        doc.text(wrapped, x + 6, y + 38 + i * 11);
-      });
-    };
-    drawParty(M);
-    drawParty(M + halfW);
-    y += bcH;
-
-    // ====== Items table ======
-    // Columns: Sl | Description | HSN | GST% | Qty | Rate | Amount
-    const cols = [
-      { w: 26, label: "Sl", align: "center" as const },
-      { w: 0, label: "Description of Services", align: "left" as const }, // flex
-      { w: 56, label: "HSN/SAC", align: "center" as const },
-      { w: 46, label: "GST", align: "center" as const },
-      { w: 34, label: "Qty", align: "center" as const },
-      { w: 70, label: "Rate", align: "right" as const },
-      { w: 80, label: "Amount", align: "right" as const },
-    ];
-    const fixedWidths = cols.reduce((s, c) => s + c.w, 0);
-    cols[1].w = innerW - fixedWidths;
-
-    const colX = (i: number) => M + cols.slice(0, i).reduce((s, c) => s + c.w, 0);
-
-    // Header row
-    const rowH = 18;
-    doc.rect(M, y, innerW, rowH);
-    cols.forEach((c, i) => {
-      if (i > 0) doc.line(colX(i), y, colX(i), y + rowH);
-      cell(c.label, colX(i), y + 2, c.w, { align: c.align, bold: true, size: 9 });
-    });
-    y += rowH;
-
-    // Body — single Sl with sub-items
-    const subItems = invoice.subItems ?? [];
-    const bodyTopY = y;
-    const lineH = 14;
-
-    const bodyRows: { label: string; amount?: number; italic?: boolean; bold?: boolean }[] = [
-      { label: invoice.serviceTitle || "Services rendered", bold: true, amount: subtotal },
-      ...subItems.map((s) => ({ label: s.label, amount: s.amount, italic: s.italic })),
-      { label: "", amount: undefined }, // spacer
-    ];
-    if (isIgst) {
-      bodyRows.push({ label: `IGST`, italic: true, amount: invoice.gstAmount });
+    if (imgH <= contentH) {
+      pdf.addImage(canvas.toDataURL("image/png"), "PNG", margin, margin, imgW, imgH);
     } else {
-      bodyRows.push({ label: `CGST`, italic: true, amount: halfTax });
-      bodyRows.push({ label: utLabel, italic: true, amount: halfTax });
-    }
-    if (roundOff !== 0) {
-      bodyRows.push({ label: "Round Off", italic: true, amount: roundOff });
-    }
-
-    const bodyH = bodyRows.length * lineH + 6;
-    // Body cell
-    doc.rect(M, y, innerW, bodyH);
-    // verticals
-    cols.forEach((_c, i) => {
-      if (i > 0) doc.line(colX(i), bodyTopY, colX(i), y + bodyH);
-    });
-
-    // Sl
-    cell("1", colX(0), bodyTopY + 2, cols[0].w, { align: "center" });
-    // HSN, GST%, Qty (only on first row)
-    cell(invoice.hsnCode || "—", colX(2), bodyTopY + 2, cols[2].w, { align: "center" });
-    cell(`${invoice.gstRate} %`, colX(3), bodyTopY + 2, cols[3].w, { align: "center" });
-    cell("1", colX(4), bodyTopY + 2, cols[4].w, { align: "center" });
-
-    // Description + Rate + Amount column rows
-    let ry = bodyTopY + 2;
-    bodyRows.forEach((r, idx) => {
-      const isFirst = idx === 0;
-      cell(r.label, colX(1), ry, cols[1].w, {
-        align: "left",
-        bold: !!r.bold,
-        italic: !!r.italic,
-        size: 9,
-      });
-      if (r.amount !== undefined) {
-        // Show "Rate" only on the first row & sub-rows (not on tax/round-off rows)
-        const isTaxRow = ["CGST", "SGST", "UTGST", "IGST", "Round Off"].includes(r.label);
-        if (!isTaxRow) {
-          cell(fmt(r.amount), colX(5), ry, cols[5].w, { align: "right", bold: isFirst });
-        }
-        cell(
-          r.amount < 0 ? `(-) ${fmt(Math.abs(r.amount))}` : fmt(r.amount),
-          colX(6),
-          ry,
-          cols[6].w,
-          { align: "right", bold: isFirst, italic: !!r.italic }
+      // Multi-page: slice the canvas vertically into page-sized chunks.
+      const pxPerPt = canvas.width / imgW;
+      const pageHeightPx = contentH * pxPerPt;
+      let renderedPx = 0;
+      while (renderedPx < canvas.height) {
+        const sliceHeightPx = Math.min(pageHeightPx, canvas.height - renderedPx);
+        const pageCanvas = document.createElement("canvas");
+        pageCanvas.width = canvas.width;
+        pageCanvas.height = sliceHeightPx;
+        const ctx = pageCanvas.getContext("2d");
+        if (!ctx) break;
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+        ctx.drawImage(
+          canvas,
+          0, renderedPx, canvas.width, sliceHeightPx,
+          0, 0, canvas.width, sliceHeightPx
         );
+        const sliceH = sliceHeightPx / pxPerPt;
+        if (renderedPx > 0) pdf.addPage();
+        pdf.addImage(pageCanvas.toDataURL("image/png"), "PNG", margin, margin, imgW, sliceH);
+        renderedPx += sliceHeightPx;
       }
-      ry += lineH;
-    });
-    y += bodyH;
-
-    // Total row
-    doc.rect(M, y, innerW, rowH + 4);
-    cols.forEach((_c, i) => {
-      if (i > 0) doc.line(colX(i), y, colX(i), y + rowH + 4);
-    });
-    cell("Total", colX(1), y + 2, cols[1].w, { align: "right", bold: true, size: 11 });
-    cell("1 nos", colX(4), y + 2, cols[4].w, { align: "center", bold: true });
-    cell(`₹ ${fmt(grandTotal)}`, colX(6), y + 2, cols[6].w, { align: "right", bold: true, size: 11 });
-    y += rowH + 4;
-
-    // ====== Amount in words ======
-    y += 6;
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.text("Amount Chargeable Including Tax (in words)", M, y + 8);
-    y += 14;
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
-    const amtWords = doc.splitTextToSize(tinyAmountInWords(grandTotal), innerW);
-    doc.text(amtWords, M, y + 8);
-    y += amtWords.length * 12 + 4;
-    doc.setFont("helvetica", "italic");
-    doc.setFontSize(8);
-    doc.text("E. & O.E", W - M, y + 4, { align: "right" });
-    y += 10;
-
-    // ====== HSN / SAC tax summary table ======
-    const tCols = isIgst
-      ? [
-          { w: 80, label: "HSN/SAC", align: "center" as const },
-          { w: 0, label: "Taxable Value", align: "right" as const },
-          { w: 60, label: "Rate", align: "center" as const },
-          { w: 80, label: "IGST Amount", align: "right" as const },
-          { w: 80, label: "Total Tax", align: "right" as const },
-        ]
-      : [
-          { w: 80, label: "HSN/SAC", align: "center" as const },
-          { w: 0, label: "Taxable Value", align: "right" as const },
-          { w: 50, label: "C.Rate", align: "center" as const },
-          { w: 70, label: "C.Amount", align: "right" as const },
-          { w: 50, label: "S.Rate", align: "center" as const },
-          { w: 70, label: "S.Amount", align: "right" as const },
-          { w: 70, label: "Total Tax", align: "right" as const },
-        ];
-    const fixed = tCols.reduce((s, c) => s + c.w, 0);
-    tCols[1].w = innerW - fixed;
-    const tColX = (i: number) => M + tCols.slice(0, i).reduce((s, c) => s + c.w, 0);
-
-    // header
-    doc.rect(M, y, innerW, rowH);
-    tCols.forEach((c, i) => {
-      if (i > 0) doc.line(tColX(i), y, tColX(i), y + rowH);
-      cell(c.label, tColX(i), y + 2, c.w, { align: c.align, bold: true, size: 9 });
-    });
-    y += rowH;
-
-    // body row
-    doc.rect(M, y, innerW, rowH);
-    tCols.forEach((_c, i) => {
-      if (i > 0) doc.line(tColX(i), y, tColX(i), y + rowH);
-    });
-    if (isIgst) {
-      cell(invoice.hsnCode || "—", tColX(0), y + 2, tCols[0].w, { align: "center" });
-      cell(fmt(subtotal), tColX(1), y + 2, tCols[1].w, { align: "right" });
-      cell(`${invoice.gstRate}%`, tColX(2), y + 2, tCols[2].w, { align: "center" });
-      cell(fmt(invoice.gstAmount), tColX(3), y + 2, tCols[3].w, { align: "right" });
-      cell(fmt(invoice.gstAmount), tColX(4), y + 2, tCols[4].w, { align: "right" });
-    } else {
-      cell(invoice.hsnCode || "—", tColX(0), y + 2, tCols[0].w, { align: "center" });
-      cell(fmt(subtotal), tColX(1), y + 2, tCols[1].w, { align: "right" });
-      cell(`${halfRate}%`, tColX(2), y + 2, tCols[2].w, { align: "center" });
-      cell(fmt(halfTax), tColX(3), y + 2, tCols[3].w, { align: "right" });
-      cell(`${halfRate}%`, tColX(4), y + 2, tCols[4].w, { align: "center" });
-      cell(fmt(halfTax), tColX(5), y + 2, tCols[5].w, { align: "right" });
-      cell(fmt(invoice.gstAmount), tColX(6), y + 2, tCols[6].w, { align: "right" });
     }
-    y += rowH;
 
-    // total row
-    doc.rect(M, y, innerW, rowH);
-    tCols.forEach((_c, i) => {
-      if (i > 0) doc.line(tColX(i), y, tColX(i), y + rowH);
-    });
-    cell("Total", tColX(0), y + 2, tCols[0].w, { align: "center", bold: true });
-    cell(fmt(subtotal), tColX(1), y + 2, tCols[1].w, { align: "right", bold: true });
-    if (isIgst) {
-      cell(fmt(invoice.gstAmount), tColX(3), y + 2, tCols[3].w, { align: "right", bold: true });
-      cell(fmt(invoice.gstAmount), tColX(4), y + 2, tCols[4].w, { align: "right", bold: true });
-    } else {
-      cell(fmt(halfTax), tColX(3), y + 2, tCols[3].w, { align: "right", bold: true });
-      cell(fmt(halfTax), tColX(5), y + 2, tCols[5].w, { align: "right", bold: true });
-      cell(fmt(invoice.gstAmount), tColX(6), y + 2, tCols[6].w, { align: "right", bold: true });
-    }
-    y += rowH + 4;
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.text("Tax Amount (in words):", M, y + 8);
-    doc.setFont("helvetica", "bold");
-    const taxWords = doc.splitTextToSize(tinyAmountInWords(invoice.gstAmount), innerW - 110);
-    doc.text(taxWords, M + 110, y + 8);
-    y += taxWords.length * 11 + 10;
-
-    // ====== Bank details ======
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
-    doc.text("Company's Bank Details:", M, y + 8);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    const bankLines = [
-      `A/c Holder's Name : ${BANK.accountName}`,
-      `Bank Name        : ${BANK.bankName}`,
-      `A/c No.          : ${BANK.accountNo}`,
-      `Branch & IFS Code: ${BANK.branchAndIfsc}`,
-    ];
-    bankLines.forEach((l, i) => doc.text(l, M, y + 22 + i * 11));
-    y += 22 + bankLines.length * 11 + 6;
-
-    // ====== Terms + Signatory ======
-    const termsH = 90;
-    doc.rect(M, y, innerW, termsH);
-    doc.line(M + halfW, y, M + halfW, y + termsH);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(9);
-    doc.text("Terms and Conditions:", M + 6, y + 12);
-    doc.text(`for ${SELLER.name}`, M + halfW + 6, y + 12);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    TERMS.forEach((t, i) => {
-      const wrapped = doc.splitTextToSize(`${i + 1}. ${t}`, halfW - 12);
-      doc.text(wrapped, M + 6, y + 26 + i * 16);
-    });
-    y += termsH + 4;
-
-    // ====== Footer ======
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(9);
-    doc.text(JURISDICTION, W / 2, y + 10, { align: "center" });
-    doc.setFont("helvetica", "italic");
-    doc.setFontSize(8);
-    doc.text("This is a Computer Generated Invoice", W / 2, H - 18, { align: "center" });
-
-    doc.save(`${invoice.number}.pdf`);
+    pdf.save(`${invoice.number}.pdf`);
   };
 
   // -------------------------- On-screen preview --------------------------- //
