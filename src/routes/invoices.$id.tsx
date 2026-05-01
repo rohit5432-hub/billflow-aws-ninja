@@ -8,6 +8,8 @@ import { numberToWordsINR } from "@/lib/fx";
 import { SELLER, BANK, TERMS, JURISDICTION } from "@/lib/seller";
 import { Download, ArrowLeft } from "lucide-react";
 import logoUrl from "@/assets/apoyphe-logo-black.png";
+import { generateInvoicePDF } from "@/lib/invoicePdf";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/invoices/$id")({
   head: () => ({ meta: [{ title: "Tax Invoice — Apoyphe" }] }),
