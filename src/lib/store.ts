@@ -128,6 +128,7 @@ type DataState = {
   addCustomer: (c: Omit<Customer, "id">) => Customer;
   addInvoice: (i: Omit<Invoice, "id" | "number">) => Invoice;
   setInvoiceStatus: (id: string, status: "paid" | "pending") => void;
+  deleteInvoice: (id: string) => void;
   addUser: (u: Omit<TeamUser, "id" | "createdAt">) => TeamUser;
   updateUser: (id: string, patch: Partial<Omit<TeamUser, "id" | "createdAt">>) => void;
   deleteUser: (id: string) => void;
@@ -173,6 +174,8 @@ export const useData = create<DataState>()(
         set((s) => ({
           invoices: s.invoices.map((x) => (x.id === id ? { ...x, status } : x)),
         })),
+      deleteInvoice: (id) =>
+        set((s) => ({ invoices: s.invoices.filter((x) => x.id !== id) })),
       loadSampleData: () => {
         const today = new Date();
         const iso = (offset = 0) =>
