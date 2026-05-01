@@ -346,8 +346,17 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
   doc.text(`Branch & IFS Code : ${BANK.branchAndIfsc}`, M + 6, y + 63);
   y += bankH;
 
-  // Terms + signatory
-  const termsH = Math.max(80, 14 + TERMS.length * 12);
+  // Terms + signatory — measure actual wrapped height first
+  const termLineH = 11;
+  const termsColW = innerW / 2 - 12;
+  const wrappedTerms = TERMS.map((t, i) =>
+    doc.splitTextToSize(`${i + 1}. ${t}`, termsColW) as string[],
+  );
+  const termsTextH = wrappedTerms.reduce(
+    (sum, lines) => sum + lines.length * termLineH + 3, // +3pt gap between terms
+    0,
+  );
+  const termsH = Math.max(80, 20 + termsTextH);
   doc.rect(M, y, innerW, termsH);
   doc.line(M + innerW / 2, y, M + innerW / 2, y + termsH);
   doc.setFont("helvetica", "bold");
@@ -355,9 +364,10 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
   doc.text("Terms and Conditions:", M + 6, y + 13);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
-  TERMS.forEach((t, i) => {
-    const lines = doc.splitTextToSize(`${i + 1}. ${t}`, innerW / 2 - 12);
-    doc.text(lines, M + 6, y + 27 + i * 12);
+  let ty = y + 27;
+  wrappedTerms.forEach((lines) => {
+    doc.text(lines, M + 6, ty);
+    ty += lines.length * termLineH + 3;
   });
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9.5);
