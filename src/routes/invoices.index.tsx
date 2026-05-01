@@ -5,9 +5,21 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useData } from "@/lib/store";
 import { formatINR } from "@/lib/fx";
-import { FilePlus2, Eye } from "lucide-react";
+import { FilePlus2, Eye, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/invoices/")({
   head: () => ({ meta: [{ title: "Invoices — Apoyphe" }] }),
@@ -18,6 +30,7 @@ function InvoicesList() {
   const invoices = useData((s) => s.invoices);
   const customers = useData((s) => s.customers);
   const setStatus = useData((s) => s.setInvoiceStatus);
+  const deleteInvoice = useData((s) => s.deleteInvoice);
   const [filter, setFilter] = useState<"all" | "paid" | "pending">("all");
 
   const filtered = invoices.filter((i) => filter === "all" || i.status === filter);
@@ -64,9 +77,38 @@ function InvoicesList() {
                     </button>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Link to="/invoices/$id" params={{ id: i.id }}>
-                      <Button size="sm" variant="ghost"><Eye className="h-4 w-4" /></Button>
-                    </Link>
+                    <div className="flex justify-end gap-1">
+                      <Link to="/invoices/$id" params={{ id: i.id }}>
+                        <Button size="sm" variant="ghost"><Eye className="h-4 w-4" /></Button>
+                      </Link>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete invoice {i.number}?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This will permanently remove the invoice. This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => {
+                                deleteInvoice(i.id);
+                                toast.success(`Invoice ${i.number} deleted`);
+                              }}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
