@@ -73,86 +73,15 @@ function InvoicePreview() {
   const consigneeSame = invoice.consigneeSameAsBuyer ?? true;
 
   // ---------------------------- PDF generation ---------------------------- //
-  // Capture the on-screen invoice card to ensure the downloaded PDF
-  // matches the preview structure exactly.
+  // Native jsPDF text rendering — no DOM capture, no oklch issues.
   const downloadPDF = async () => {
-    const el = printRef.current;
-    if (!el || isDownloading) return;
+    if (isDownloading) return;
     setIsDownloading(true);
     try {
-      const [{ default: jsPDF }, { default: html2canvas }] = await Promise.all([
-        import("jspdf"),
-        import("html2canvas"),
-      ]);
-
-      const canvas = await html2canvas(el, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: "#ffffff",
-        onclone: (_doc, clonedEl) => {
-          clonedEl.style.backgroundColor = "#ffffff";
-          clonedEl.style.color = "#111827";
-          clonedEl.style.borderColor = "#1f2937";
-          clonedEl.style.boxShadow = "none";
-          clonedEl.querySelectorAll<HTMLElement>("*").forEach((node) => {
-            const classes = node.className.toString();
-            node.style.color = classes.includes("text-muted") ? "#52525b" : "#111827";
-            node.style.borderColor = "#1f2937";
-            node.style.boxShadow = "none";
-            if (classes.includes("bg-muted")) {
-              node.style.backgroundColor = "#f4f4f5";
-            } else if (node.tagName !== "IMG") {
-              node.style.backgroundColor = "#ffffff";
-            }
-          });
-        },
-      });
-
-      const pdf = new jsPDF({ unit: "pt", format: "a4", orientation: "portrait" });
-      const pageW = pdf.internal.pageSize.getWidth();
-      const pageH = pdf.internal.pageSize.getHeight();
-      const margin = 20;
-      const contentW = pageW - margin * 2;
-      const contentH = pageH - margin * 2;
-
-      const imgW = contentW;
-      const imgH = (canvas.height * imgW) / canvas.width;
-
-      if (imgH <= contentH) {
-        pdf.addImage(canvas.toDataURL("image/png"), "PNG", margin, margin, imgW, imgH);
-      } else {
-        // Multi-page: slice the canvas vertically into page-sized chunks.
-        const pxPerPt = canvas.width / imgW;
-        const pageHeightPx = contentH * pxPerPt;
-        let renderedPx = 0;
-        while (renderedPx < canvas.height) {
-          const sliceHeightPx = Math.min(pageHeightPx, canvas.height - renderedPx);
-          const pageCanvas = document.createElement("canvas");
-          pageCanvas.width = canvas.width;
-          pageCanvas.height = sliceHeightPx;
-          const ctx = pageCanvas.getContext("2d");
-          if (!ctx) break;
-          ctx.fillStyle = "#ffffff";
-          ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
-          ctx.drawImage(
-            canvas,
-            0,
-            renderedPx,
-            canvas.width,
-            sliceHeightPx,
-            0,
-            0,
-            canvas.width,
-            sliceHeightPx,
-          );
-          const sliceH = sliceHeightPx / pxPerPt;
-          if (renderedPx > 0) pdf.addPage();
-          pdf.addImage(pageCanvas.toDataURL("image/png"), "PNG", margin, margin, imgW, sliceH);
-          renderedPx += sliceHeightPx;
-        }
-      }
-
-      pdf.save(`${invoice.number}.pdf`);
+      await generateInvoicePDF(invoice, customer);
+    } catch (err) {
+      console.error("PDF generation failed:", err);
+      toast.error("Failed to generate PDF. Please try again.");
     } finally {
       setIsDownloading(false);
     }
