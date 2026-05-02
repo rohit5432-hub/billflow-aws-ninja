@@ -173,11 +173,11 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
     if (col > 0) doc.line(cx, cy, cx, cy + cellH);
     if (row > 0) doc.line(cx, cy, cx + cellW, cy);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(7.5);
-    doc.setTextColor(110);
+    doc.setFontSize(8);
+    doc.setTextColor(60);
     doc.text(cell[0], cx + 4, cy + 11);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(9);
+    doc.setFontSize(9.5);
     doc.setTextColor(0);
     doc.text(String(cell[1]), cx + 4, cy + 24);
   });
