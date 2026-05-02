@@ -409,6 +409,7 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
     doc.text("Total\nTax Amount", sumX[6] + sumCols[6] / 2, y + 11, { align: "center" });
   }
   y += sumHeadH;
+  doc.setTextColor(0);
 
   // Data row + total row
   const sumRowH = 16;
