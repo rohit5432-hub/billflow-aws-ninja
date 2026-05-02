@@ -191,7 +191,7 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
     const cx = M + (idx === 0 ? 0 : innerW / 2) + 6;
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
-    doc.setTextColor(110);
+    doc.setTextColor(60);
     doc.text(title, cx, y + 12);
     doc.setTextColor(0);
     doc.setFont("helvetica", "bold");
