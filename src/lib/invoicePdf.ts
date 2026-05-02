@@ -114,13 +114,23 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
   doc.rect(M, y, innerW, headerH);
   doc.line(M + leftW, y, M + leftW, y + headerH);
 
-  // Logo + seller
+  // Logo + seller — preserve aspect ratio
   const logoData = await loadLogoDataUrl();
   let sellerX = M + 8;
   if (logoData) {
     try {
-      doc.addImage(logoData, "PNG", M + 6, y + 8, 38, 38);
-      sellerX = M + 52;
+      const props = doc.getImageProperties(logoData);
+      const maxH = 40;
+      const maxW = 60;
+      const ratio = props.width / props.height;
+      let lw = maxH * ratio;
+      let lh = maxH;
+      if (lw > maxW) {
+        lw = maxW;
+        lh = maxW / ratio;
+      }
+      doc.addImage(logoData, "PNG", M + 6, y + 8, lw, lh);
+      sellerX = M + 6 + lw + 8;
     } catch {
       // ignore logo failure
     }
@@ -163,11 +173,11 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
     if (col > 0) doc.line(cx, cy, cx, cy + cellH);
     if (row > 0) doc.line(cx, cy, cx + cellW, cy);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(7.5);
-    doc.setTextColor(110);
+    doc.setFontSize(8);
+    doc.setTextColor(60);
     doc.text(cell[0], cx + 4, cy + 11);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(9);
+    doc.setFontSize(9.5);
     doc.setTextColor(0);
     doc.text(String(cell[1]), cx + 4, cy + 24);
   });
@@ -181,7 +191,7 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
     const cx = M + (idx === 0 ? 0 : innerW / 2) + 6;
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
-    doc.setTextColor(110);
+    doc.setTextColor(60);
     doc.text(title, cx, y + 12);
     doc.setTextColor(0);
     doc.setFont("helvetica", "bold");
