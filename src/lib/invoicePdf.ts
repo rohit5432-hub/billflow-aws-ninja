@@ -287,9 +287,8 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
     y += rowH;
   });
 
-  y += 6; // spacer
-
-  // Tax rows — label sits at right edge of description col (italic), amount in Rate & Amount
+  // Tax rows directly below sub-items — "Add :" label on left, tax label italic on right of desc col
+  const taxBlockStartY = y;
   const taxRow = (label: string, amt: number) => {
     doc.setFont("helvetica", "italic");
     doc.text(label, colX[1] + cols[1] - 6, y + 11, { align: "right" });
@@ -304,8 +303,6 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
     taxRow("CGST", halfTax);
     taxRow(utLabel, halfTax);
   }
-  // "Add :" label on the left side, aligned with first tax row visually
-  // (drawn after so it doesn't shift y)
   if (roundOff !== 0) {
     doc.setFont("helvetica", "italic");
     doc.text("Round Off", colX[1] + cols[1] - 6, y + 11, { align: "right" });
@@ -313,10 +310,10 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
     doc.text(fmt(roundOff), colX[6] + cols[6] - 4, y + 11, { align: "right" });
     y += rowH;
   }
-  // Draw "Add :" label aligned with start of tax block
+  // "Add :" label aligned with first tax row
   doc.setFont("helvetica", "italic");
   doc.setFontSize(9);
-  doc.text("Add :", colX[1] + 8, y - rowH * (isIgst ? 1 : 2) - (roundOff !== 0 ? rowH : 0) + 11);
+  doc.text("Add :", colX[1] + 8, taxBlockStartY + 11);
 
   // Fixed-column borders for full body
   const bodyEndY = y;
