@@ -114,13 +114,23 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
   doc.rect(M, y, innerW, headerH);
   doc.line(M + leftW, y, M + leftW, y + headerH);
 
-  // Logo + seller
+  // Logo + seller — preserve aspect ratio
   const logoData = await loadLogoDataUrl();
   let sellerX = M + 8;
   if (logoData) {
     try {
-      doc.addImage(logoData, "PNG", M + 6, y + 8, 38, 38);
-      sellerX = M + 52;
+      const props = doc.getImageProperties(logoData);
+      const maxH = 40;
+      const maxW = 60;
+      const ratio = props.width / props.height;
+      let lw = maxH * ratio;
+      let lh = maxH;
+      if (lw > maxW) {
+        lw = maxW;
+        lh = maxW / ratio;
+      }
+      doc.addImage(logoData, "PNG", M + 6, y + 8, lw, lh);
+      sellerX = M + 6 + lw + 8;
     } catch {
       // ignore logo failure
     }
