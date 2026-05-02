@@ -165,17 +165,21 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
     ["Buyer's Order No.", invoice.buyersOrderNo || "—"],
     ["Other References", invoice.status.toUpperCase()],
   ];
+  const labelBandH = 13;
   meta.forEach((cell, i) => {
     const col = i % metaCols;
     const row = Math.floor(i / metaCols);
     const cx = M + leftW + col * cellW;
     const cy = y + row * cellH;
+    // Highlight band for the label
+    doc.setFillColor(225, 232, 240); // light slate
+    doc.rect(cx, cy, cellW, labelBandH, "F");
     if (col > 0) doc.line(cx, cy, cx, cy + cellH);
     if (row > 0) doc.line(cx, cy, cx + cellW, cy);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    doc.setTextColor(60);
-    doc.text(cell[0], cx + 4, cy + 11);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7.8);
+    doc.setTextColor(40);
+    doc.text(cell[0], cx + 4, cy + 9);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9.5);
     doc.setTextColor(0);
@@ -185,14 +189,19 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
 
   // ===== Buyer / Consignee =====
   const partyH = 92;
+  const partyTitleH = 14;
   doc.rect(M, y, innerW, partyH);
   doc.line(M + innerW / 2, y, M + innerW / 2, y + partyH);
+  // Highlight title bands
+  doc.setFillColor(225, 232, 240);
+  doc.rect(M, y, innerW / 2, partyTitleH, "F");
+  doc.rect(M + innerW / 2, y, innerW / 2, partyTitleH, "F");
   ["Buyer (Bill to)", "Consignee (Ship to)"].forEach((title, idx) => {
     const cx = M + (idx === 0 ? 0 : innerW / 2) + 6;
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    doc.setTextColor(60);
-    doc.text(title, cx, y + 12);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.5);
+    doc.setTextColor(40);
+    doc.text(title, cx, y + 10);
     doc.setTextColor(0);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
@@ -231,9 +240,12 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
   });
 
   const headerRowH = 18;
+  doc.setFillColor(225, 232, 240);
+  doc.rect(M, y, innerW, headerRowH, "F");
   doc.rect(M, y, innerW, headerRowH);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8.5);
+  doc.setTextColor(40);
   const headers = ["Sl", "Description of Services", "HSN/SAC", "GST", "Qty", "Rate", "Amount"];
   headers.forEach((h, i) => {
     if (i > 0) doc.line(colX[i], y, colX[i], y + headerRowH);
@@ -246,6 +258,7 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
           : colX[i] + cols[i] / 2;
     doc.text(h, tx, y + 12, { align });
   });
+  doc.setTextColor(0);
   y += headerRowH;
 
   // Body rows
@@ -274,9 +287,8 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
     y += rowH;
   });
 
-  y += 6; // spacer
-
-  // Tax rows — label sits at right edge of description col (italic), amount in Rate & Amount
+  // Tax rows directly below sub-items — "Add :" label on left, tax label italic on right of desc col
+  const taxBlockStartY = y;
   const taxRow = (label: string, amt: number) => {
     doc.setFont("helvetica", "italic");
     doc.text(label, colX[1] + cols[1] - 6, y + 11, { align: "right" });
@@ -291,8 +303,6 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
     taxRow("CGST", halfTax);
     taxRow(utLabel, halfTax);
   }
-  // "Add :" label on the left side, aligned with first tax row visually
-  // (drawn after so it doesn't shift y)
   if (roundOff !== 0) {
     doc.setFont("helvetica", "italic");
     doc.text("Round Off", colX[1] + cols[1] - 6, y + 11, { align: "right" });
@@ -300,10 +310,10 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
     doc.text(fmt(roundOff), colX[6] + cols[6] - 4, y + 11, { align: "right" });
     y += rowH;
   }
-  // Draw "Add :" label aligned with start of tax block
+  // "Add :" label aligned with first tax row
   doc.setFont("helvetica", "italic");
   doc.setFontSize(9);
-  doc.text("Add :", colX[1] + 8, y - rowH * (isIgst ? 1 : 2) - (roundOff !== 0 ? rowH : 0) + 11);
+  doc.text("Add :", colX[1] + 8, taxBlockStartY + 11);
 
   // Fixed-column borders for full body
   const bodyEndY = y;
@@ -362,9 +372,12 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
   });
 
   const sumHeadH = 26;
+  doc.setFillColor(225, 232, 240);
+  doc.rect(M, y, innerW, sumHeadH, "F");
   doc.rect(M, y, innerW, sumHeadH);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8.5);
+  doc.setTextColor(40);
 
   if (isIgst) {
     const heads = ["HSN/SAC", "Taxable Value", "Rate", "Amount", "Total Tax Amount"];
@@ -396,6 +409,7 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
     doc.text("Total\nTax Amount", sumX[6] + sumCols[6] / 2, y + 11, { align: "center" });
   }
   y += sumHeadH;
+  doc.setTextColor(0);
 
   // Data row + total row
   const sumRowH = 16;
