@@ -332,7 +332,7 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
   doc.setFontSize(10);
   doc.text("Total", colX[1] + cols[1] - 4, y + 12, { align: "right" });
   doc.text("1 nos", colX[4] + cols[4] / 2, y + 12, { align: "center" });
-  doc.text(`Rs ${fmt(grandTotal)}`, colX[6] + cols[6] - 4, y + 12, { align: "right" });
+  doc.text(`\u20B9 ${fmt(grandTotal)}`, colX[6] + cols[6] - 4, y + 12, { align: "right" });
   y += totalH;
 
   // Amount in words box
@@ -341,10 +341,90 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.5);
   doc.text("Amount Chargeable Including Tax (in words)", M + 6, y + 12);
+  doc.text("E. & O.E", M + innerW - 6, y + 12, { align: "right" });
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9.5);
   drawWrapped(doc, amountInWords(grandTotal), M + 6, y + 26, innerW - 12, 11);
   y += wordsH;
+
+  // ===== HSN/SAC tax summary table =====
+  // Columns: HSN/SAC | Taxable Value | Central Tax (Rate, Amount) | State Tax (Rate, Amount) | Total Tax
+  const sumCols = isIgst
+    ? [80, 110, 70, 100, 80] // IGST: HSN | Taxable | Rate | Amount | Total
+    : [80, 110, 50, 70, 50, 70, 80]; // CGST/SGST split
+  const sumFlex = innerW - sumCols.reduce((a, b) => a + b, 0);
+  sumCols[1] += sumFlex; // give extra space to Taxable Value
+  const sumX: number[] = [];
+  let sx = M;
+  sumCols.forEach((w) => {
+    sumX.push(sx);
+    sx += w;
+  });
+
+  const sumHeadH = 26;
+  doc.rect(M, y, innerW, sumHeadH);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8.5);
+
+  if (isIgst) {
+    const heads = ["HSN/SAC", "Taxable Value", "Rate", "Amount", "Total Tax Amount"];
+    heads.forEach((h, i) => {
+      if (i > 0) doc.line(sumX[i], y, sumX[i], y + sumHeadH);
+      doc.text(h, sumX[i] + sumCols[i] / 2, y + 16, { align: "center" });
+    });
+  } else {
+    // Two-row header: HSN | Taxable | Central Tax (merged) | State Tax (merged) | Total
+    doc.text("HSN/SAC", sumX[0] + sumCols[0] / 2, y + 16, { align: "center" });
+    doc.line(sumX[1], y, sumX[1], y + sumHeadH);
+    doc.text("Taxable\nValue", sumX[1] + sumCols[1] / 2, y + 11, { align: "center" });
+    // Central Tax merged over cols 2,3
+    doc.line(sumX[2], y, sumX[2], y + sumHeadH);
+    doc.text("Central Tax", sumX[2] + (sumCols[2] + sumCols[3]) / 2, y + 10, { align: "center" });
+    doc.line(sumX[2], y + 13, sumX[2] + sumCols[2] + sumCols[3], y + 13);
+    doc.text("Rate", sumX[2] + sumCols[2] / 2, y + 22, { align: "center" });
+    doc.line(sumX[3], y + 13, sumX[3], y + sumHeadH);
+    doc.text("Amount", sumX[3] + sumCols[3] / 2, y + 22, { align: "center" });
+    // State Tax merged over cols 4,5
+    doc.line(sumX[4], y, sumX[4], y + sumHeadH);
+    doc.text(utLabel === "UTGST" ? "UT Tax" : "State Tax", sumX[4] + (sumCols[4] + sumCols[5]) / 2, y + 10, { align: "center" });
+    doc.line(sumX[4], y + 13, sumX[4] + sumCols[4] + sumCols[5], y + 13);
+    doc.text("Rate", sumX[4] + sumCols[4] / 2, y + 22, { align: "center" });
+    doc.line(sumX[5], y + 13, sumX[5], y + sumHeadH);
+    doc.text("Amount", sumX[5] + sumCols[5] / 2, y + 22, { align: "center" });
+    // Total tax
+    doc.line(sumX[6], y, sumX[6], y + sumHeadH);
+    doc.text("Total\nTax Amount", sumX[6] + sumCols[6] / 2, y + 11, { align: "center" });
+  }
+  y += sumHeadH;
+
+  // Data row + total row
+  const sumRowH = 16;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  const drawSumRow = (hsn: string, taxable: number, isTotalRow = false) => {
+    if (isTotalRow) doc.setFont("helvetica", "bold");
+    doc.rect(M, y, innerW, sumRowH);
+    for (let i = 1; i < sumCols.length; i++) {
+      doc.line(sumX[i], y, sumX[i], y + sumRowH);
+    }
+    doc.text(hsn, sumX[0] + sumCols[0] / 2, y + 11, { align: "center" });
+    doc.text(fmt(taxable), sumX[1] + sumCols[1] - 4, y + 11, { align: "right" });
+    if (isIgst) {
+      doc.text(`${invoice.gstRate}%`, sumX[2] + sumCols[2] / 2, y + 11, { align: "center" });
+      doc.text(fmt(invoice.gstAmount), sumX[3] + sumCols[3] - 4, y + 11, { align: "right" });
+      doc.text(fmt(invoice.gstAmount), sumX[4] + sumCols[4] - 4, y + 11, { align: "right" });
+    } else {
+      doc.text(`${halfRate}%`, sumX[2] + sumCols[2] / 2, y + 11, { align: "center" });
+      doc.text(fmt(halfTax), sumX[3] + sumCols[3] - 4, y + 11, { align: "right" });
+      doc.text(`${halfRate}%`, sumX[4] + sumCols[4] / 2, y + 11, { align: "center" });
+      doc.text(fmt(halfTax), sumX[5] + sumCols[5] - 4, y + 11, { align: "right" });
+      doc.text(fmt(invoice.gstAmount), sumX[6] + sumCols[6] - 4, y + 11, { align: "right" });
+    }
+    doc.setFont("helvetica", "normal");
+    y += sumRowH;
+  };
+  drawSumRow(invoice.hsnCode || "—", subtotal, false);
+  drawSumRow("Total", subtotal, true);
 
   // Tax-amount-in-words
   doc.setFont("helvetica", "normal");
