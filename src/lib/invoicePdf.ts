@@ -240,9 +240,12 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
   });
 
   const headerRowH = 18;
+  doc.setFillColor(225, 232, 240);
+  doc.rect(M, y, innerW, headerRowH, "F");
   doc.rect(M, y, innerW, headerRowH);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8.5);
+  doc.setTextColor(40);
   const headers = ["Sl", "Description of Services", "HSN/SAC", "GST", "Qty", "Rate", "Amount"];
   headers.forEach((h, i) => {
     if (i > 0) doc.line(colX[i], y, colX[i], y + headerRowH);
@@ -255,6 +258,7 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
           : colX[i] + cols[i] / 2;
     doc.text(h, tx, y + 12, { align });
   });
+  doc.setTextColor(0);
   y += headerRowH;
 
   // Body rows
