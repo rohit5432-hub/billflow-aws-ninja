@@ -253,19 +253,21 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
 
-  // Row 1: title + amount
+  // Row 1: title centered + amount
   const rowH = 14;
+  const descCenterX = colX[1] + cols[1] / 2;
   doc.setFont("helvetica", "bold");
-  doc.text(invoice.serviceTitle || "Services rendered", colX[1] + 4, y + 11);
+  doc.text(invoice.serviceTitle || "Services rendered", descCenterX, y + 11, { align: "center" });
   doc.text(fmt(subtotal), colX[5] + cols[5] - 4, y + 11, { align: "right" });
   doc.text(fmt(subtotal), colX[6] + cols[6] - 4, y + 11, { align: "right" });
   doc.setFont("helvetica", "normal");
   y += rowH;
 
-  // Sub-items
+  // Sub-items — centered in description column
   (invoice.subItems ?? []).forEach((s) => {
     if (s.italic) doc.setFont("helvetica", "italic");
-    doc.text(s.label, colX[1] + 4, y + 11);
+    else doc.setFont("helvetica", "normal");
+    doc.text(s.label, descCenterX, y + 11, { align: "center" });
     doc.setFont("helvetica", "normal");
     doc.text(fmt(s.amount), colX[5] + cols[5] - 4, y + 11, { align: "right" });
     doc.text(fmt(s.amount), colX[6] + cols[6] - 4, y + 11, { align: "right" });
@@ -274,11 +276,12 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
 
   y += 6; // spacer
 
-  // Tax rows
+  // Tax rows — label sits at right edge of description col (italic), amount in Rate & Amount
   const taxRow = (label: string, amt: number) => {
     doc.setFont("helvetica", "italic");
-    doc.text(label, colX[5] + cols[5] - 4, y + 11, { align: "right" });
+    doc.text(label, colX[1] + cols[1] - 6, y + 11, { align: "right" });
     doc.setFont("helvetica", "normal");
+    doc.text(fmt(amt), colX[5] + cols[5] - 4, y + 11, { align: "right" });
     doc.text(fmt(amt), colX[6] + cols[6] - 4, y + 11, { align: "right" });
     y += rowH;
   };
@@ -288,9 +291,19 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
     taxRow("CGST", halfTax);
     taxRow(utLabel, halfTax);
   }
+  // "Add :" label on the left side, aligned with first tax row visually
+  // (drawn after so it doesn't shift y)
   if (roundOff !== 0) {
-    taxRow("Round Off", roundOff);
+    doc.setFont("helvetica", "italic");
+    doc.text("Round Off", colX[1] + cols[1] - 6, y + 11, { align: "right" });
+    doc.setFont("helvetica", "normal");
+    doc.text(fmt(roundOff), colX[6] + cols[6] - 4, y + 11, { align: "right" });
+    y += rowH;
   }
+  // Draw "Add :" label aligned with start of tax block
+  doc.setFont("helvetica", "italic");
+  doc.setFontSize(9);
+  doc.text("Add :", colX[1] + 8, y - rowH * (isIgst ? 1 : 2) - (roundOff !== 0 ? rowH : 0) + 11);
 
   // Fixed-column borders for full body
   const bodyEndY = y;
