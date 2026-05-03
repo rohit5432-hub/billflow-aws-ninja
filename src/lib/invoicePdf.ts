@@ -171,9 +171,6 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
     const row = Math.floor(i / metaCols);
     const cx = M + leftW + col * cellW;
     const cy = y + row * cellH;
-    // Highlight band for the label
-    doc.setFillColor(225, 232, 240); // light slate
-    doc.rect(cx, cy, cellW, labelBandH, "F");
     if (col > 0) doc.line(cx, cy, cx, cy + cellH);
     if (row > 0) doc.line(cx, cy, cx + cellW, cy);
     doc.setFont("helvetica", "bold");
@@ -192,10 +189,6 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
   const partyTitleH = 14;
   doc.rect(M, y, innerW, partyH);
   doc.line(M + innerW / 2, y, M + innerW / 2, y + partyH);
-  // Highlight title bands
-  doc.setFillColor(225, 232, 240);
-  doc.rect(M, y, innerW / 2, partyTitleH, "F");
-  doc.rect(M + innerW / 2, y, innerW / 2, partyTitleH, "F");
   ["Buyer (Bill to)", "Consignee (Ship to)"].forEach((title, idx) => {
     const cx = M + (idx === 0 ? 0 : innerW / 2) + 6;
     doc.setFont("helvetica", "bold");
@@ -240,8 +233,6 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
   });
 
   const headerRowH = 18;
-  doc.setFillColor(225, 232, 240);
-  doc.rect(M, y, innerW, headerRowH, "F");
   doc.rect(M, y, innerW, headerRowH);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8.5);
@@ -372,8 +363,6 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
   });
 
   const sumHeadH = 26;
-  doc.setFillColor(225, 232, 240);
-  doc.rect(M, y, innerW, sumHeadH, "F");
   doc.rect(M, y, innerW, sumHeadH);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8.5);
