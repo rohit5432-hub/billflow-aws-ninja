@@ -137,7 +137,7 @@ function InvoicePreview() {
                 key={i}
                 className="border-l border-b border-foreground/80 first:border-l-0 [&:nth-child(2)]:border-l [&:nth-child(5)]:border-b-0 [&:nth-child(6)]:border-b-0"
               >
-                <p className="text-[10px] font-bold text-foreground bg-[#E1E8F0] px-2 py-0.5">{label}</p>
+                <p className="text-[10px] font-bold text-foreground px-2 py-0.5">{label}</p>
                 <p className="font-semibold px-2 py-1">{value}</p>
               </div>
             ))}
@@ -148,7 +148,7 @@ function InvoicePreview() {
         <div className="grid grid-cols-2 border-x border-b border-foreground/80">
           {["Buyer (Bill to)", "Consignee (Ship to)"].map((title, idx) => (
             <div key={idx} className={`${idx === 0 ? "border-r border-foreground/80" : ""}`}>
-              <p className="text-[10px] font-bold text-foreground bg-[#E1E8F0] px-2 py-0.5">{title}</p>
+              <p className="text-[10px] font-bold text-foreground px-2 py-0.5">{title}</p>
               <div className="p-2">
                 <p className="font-bold">{customer.name}</p>
                 <p className="whitespace-pre-line">{customer.address}</p>
@@ -215,39 +215,38 @@ function InvoicePreview() {
                 <td className="px-2 py-0.5 text-right">{fmt(s.amount)}</td>
               </tr>
             ))}
-            {isIgst ? (
-              <tr>
-                <td className="px-2 py-0.5 text-right italic" colSpan={2}>
-                  IGST
-                </td>
-                <td className="px-2 py-0.5 text-right">{fmt(invoice.gstAmount)}</td>
-              </tr>
-            ) : (
-              <>
-                <tr>
-                  <td className="px-2 py-0.5 text-right italic" colSpan={2}>
-                    CGST
+            {(() => {
+              const taxLines: { label: string; amount: number }[] = [];
+              if (isIgst) {
+                taxLines.push({ label: "IGST", amount: invoice.gstAmount });
+              } else {
+                taxLines.push({ label: "CGST", amount: halfTax });
+                taxLines.push({ label: utLabel, amount: halfTax });
+              }
+              if (roundOff !== 0) {
+                taxLines.push({ label: "Round Off", amount: roundOff });
+              }
+              return taxLines.map((line, i) => (
+                <tr key={i}>
+                  <td className="px-2 py-0.5 text-right italic relative">
+                    {i === 0 && (
+                      <span className="absolute left-2 not-italic">Add :</span>
+                    )}
+                    {line.label}
                   </td>
-                  <td className="px-2 py-0.5 text-right">{fmt(halfTax)}</td>
-                </tr>
-                <tr>
-                  <td className="px-2 py-0.5 text-right italic" colSpan={2}>
-                    {utLabel}
+                  <td className="px-2 py-0.5 text-right">
+                    {line.label === "Round Off" && line.amount < 0
+                      ? `(-) ${fmt(Math.abs(line.amount))}`
+                      : fmt(line.amount)}
                   </td>
-                  <td className="px-2 py-0.5 text-right">{fmt(halfTax)}</td>
+                  <td className="px-2 py-0.5 text-right">
+                    {line.label === "Round Off" && line.amount < 0
+                      ? `(-) ${fmt(Math.abs(line.amount))}`
+                      : fmt(line.amount)}
+                  </td>
                 </tr>
-              </>
-            )}
-            {roundOff !== 0 && (
-              <tr>
-                <td className="px-2 py-0.5 text-right italic" colSpan={2}>
-                  Round Off
-                </td>
-                <td className="px-2 py-0.5 text-right">
-                  {roundOff < 0 ? `(-) ${fmt(Math.abs(roundOff))}` : fmt(roundOff)}
-                </td>
-              </tr>
-            )}
+              ));
+            })()}
             <tr className="border-t border-foreground/80 font-bold">
               <td className="px-2 py-1 text-right">Total</td>
               <td className="border-l border-foreground/80 text-center py-1" colSpan={2}>
