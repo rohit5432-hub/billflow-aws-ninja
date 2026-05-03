@@ -171,9 +171,6 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
     const row = Math.floor(i / metaCols);
     const cx = M + leftW + col * cellW;
     const cy = y + row * cellH;
-    // Highlight band for the label
-    doc.setFillColor(225, 232, 240); // light slate
-    doc.rect(cx, cy, cellW, labelBandH, "F");
     if (col > 0) doc.line(cx, cy, cx, cy + cellH);
     if (row > 0) doc.line(cx, cy, cx + cellW, cy);
     doc.setFont("helvetica", "bold");
