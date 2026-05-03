@@ -137,7 +137,7 @@ function InvoicePreview() {
                 key={i}
                 className="border-l border-b border-foreground/80 first:border-l-0 [&:nth-child(2)]:border-l [&:nth-child(5)]:border-b-0 [&:nth-child(6)]:border-b-0"
               >
-                <p className="text-[10px] font-bold text-foreground bg-[#E1E8F0] px-2 py-0.5">{label}</p>
+                <p className="text-[10px] font-bold text-foreground px-2 py-0.5">{label}</p>
                 <p className="font-semibold px-2 py-1">{value}</p>
               </div>
             ))}
