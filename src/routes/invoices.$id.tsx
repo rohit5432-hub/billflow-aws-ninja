@@ -186,7 +186,7 @@ function InvoicePreview() {
               >
                 1
               </td>
-              <td className="px-2 py-1 font-bold">{invoice.serviceTitle || "Services rendered"}</td>
+              <td className="px-2 py-1 font-bold text-center">{invoice.serviceTitle || "Services rendered"}</td>
               <td
                 rowSpan={5 + (invoice.subItems?.length ?? 0) + (roundOff ? 1 : 0)}
                 className="border-l border-r border-foreground/80 text-center align-top py-1"
@@ -210,7 +210,7 @@ function InvoicePreview() {
             </tr>
             {(invoice.subItems ?? []).map((s, i) => (
               <tr key={i}>
-                <td className={`px-2 py-0.5 ${s.italic ? "italic" : ""}`}>{s.label}</td>
+                <td className={`px-2 py-0.5 text-center ${s.italic ? "italic" : ""}`}>{s.label}</td>
                 <td className="px-2 py-0.5 text-right">{fmt(s.amount)}</td>
                 <td className="px-2 py-0.5 text-right">{fmt(s.amount)}</td>
               </tr>
