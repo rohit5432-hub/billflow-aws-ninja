@@ -189,8 +189,6 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
   const partyTitleH = 14;
   doc.rect(M, y, innerW, partyH);
   doc.line(M + innerW / 2, y, M + innerW / 2, y + partyH);
-  doc.rect(M, y, innerW / 2, partyTitleH, "F");
-  doc.rect(M + innerW / 2, y, innerW / 2, partyTitleH, "F");
   ["Buyer (Bill to)", "Consignee (Ship to)"].forEach((title, idx) => {
     const cx = M + (idx === 0 ? 0 : innerW / 2) + 6;
     doc.setFont("helvetica", "bold");
