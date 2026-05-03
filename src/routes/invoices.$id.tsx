@@ -135,10 +135,10 @@ function InvoicePreview() {
             ].map(([label, value], i) => (
               <div
                 key={i}
-                className="p-2 border-l border-b border-foreground/80 first:border-l-0 [&:nth-child(2)]:border-l [&:nth-child(5)]:border-b-0 [&:nth-child(6)]:border-b-0"
+                className="border-l border-b border-foreground/80 first:border-l-0 [&:nth-child(2)]:border-l [&:nth-child(5)]:border-b-0 [&:nth-child(6)]:border-b-0"
               >
-                <p className="text-[10px] text-muted-foreground">{label}</p>
-                <p className="font-semibold">{value}</p>
+                <p className="text-[10px] font-bold text-foreground bg-[#E1E8F0] px-2 py-0.5">{label}</p>
+                <p className="font-semibold px-2 py-1">{value}</p>
               </div>
             ))}
           </div>
@@ -147,16 +147,18 @@ function InvoicePreview() {
         {/* Buyer / Consignee */}
         <div className="grid grid-cols-2 border-x border-b border-foreground/80">
           {["Buyer (Bill to)", "Consignee (Ship to)"].map((title, idx) => (
-            <div key={idx} className={`p-2 ${idx === 0 ? "border-r border-foreground/80" : ""}`}>
-              <p className="text-[10px] text-muted-foreground">{title}</p>
-              <p className="font-bold">{customer.name}</p>
-              <p className="whitespace-pre-line">{customer.address}</p>
-              {customer.gstin && <p>GSTIN/UIN: {customer.gstin}</p>}
-              <p>State Name: {invoice.placeOfSupply || SELLER.stateName}, Code: 36</p>
-              <p>Place of Supply: {invoice.placeOfSupply || SELLER.stateName}</p>
-              {!consigneeSame && idx === 1 && (
-                <p className="italic text-muted-foreground mt-1">(Same as buyer)</p>
-              )}
+            <div key={idx} className={`${idx === 0 ? "border-r border-foreground/80" : ""}`}>
+              <p className="text-[10px] font-bold text-foreground bg-[#E1E8F0] px-2 py-0.5">{title}</p>
+              <div className="p-2">
+                <p className="font-bold">{customer.name}</p>
+                <p className="whitespace-pre-line">{customer.address}</p>
+                {customer.gstin && <p>GSTIN/UIN: {customer.gstin}</p>}
+                <p>State Name: {invoice.placeOfSupply || SELLER.stateName}, Code: 36</p>
+                <p>Place of Supply: {invoice.placeOfSupply || SELLER.stateName}</p>
+                {!consigneeSame && idx === 1 && (
+                  <p className="italic text-muted-foreground mt-1">(Same as buyer)</p>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -179,26 +181,26 @@ function InvoicePreview() {
           <tbody>
             <tr>
               <td
-                rowSpan={6 + (invoice.subItems?.length ?? 0) + (roundOff ? 1 : 0)}
+                rowSpan={5 + (invoice.subItems?.length ?? 0) + (roundOff ? 1 : 0)}
                 className="border-r border-foreground/80 text-center align-top py-1"
               >
                 1
               </td>
               <td className="px-2 py-1 font-bold">{invoice.serviceTitle || "Services rendered"}</td>
               <td
-                rowSpan={6 + (invoice.subItems?.length ?? 0) + (roundOff ? 1 : 0)}
+                rowSpan={5 + (invoice.subItems?.length ?? 0) + (roundOff ? 1 : 0)}
                 className="border-l border-r border-foreground/80 text-center align-top py-1"
               >
                 {invoice.hsnCode || "—"}
               </td>
               <td
-                rowSpan={6 + (invoice.subItems?.length ?? 0) + (roundOff ? 1 : 0)}
+                rowSpan={5 + (invoice.subItems?.length ?? 0) + (roundOff ? 1 : 0)}
                 className="border-r border-foreground/80 text-center align-top py-1"
               >
                 {invoice.gstRate}%
               </td>
               <td
-                rowSpan={6 + (invoice.subItems?.length ?? 0) + (roundOff ? 1 : 0)}
+                rowSpan={5 + (invoice.subItems?.length ?? 0) + (roundOff ? 1 : 0)}
                 className="border-r border-foreground/80 text-center align-top py-1"
               >
                 1
@@ -213,9 +215,6 @@ function InvoicePreview() {
                 <td className="px-2 py-0.5 text-right">{fmt(s.amount)}</td>
               </tr>
             ))}
-            <tr>
-              <td colSpan={3} className="py-1"></td>
-            </tr>
             {isIgst ? (
               <tr>
                 <td className="px-2 py-0.5 text-right italic" colSpan={2}>
