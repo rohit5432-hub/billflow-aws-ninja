@@ -215,9 +215,6 @@ function InvoicePreview() {
                 <td className="px-2 py-0.5 text-right">{fmt(s.amount)}</td>
               </tr>
             ))}
-            <tr>
-              <td colSpan={3} className="py-1"></td>
-            </tr>
             {isIgst ? (
               <tr>
                 <td className="px-2 py-0.5 text-right italic" colSpan={2}>
