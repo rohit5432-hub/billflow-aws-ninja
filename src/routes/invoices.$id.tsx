@@ -181,26 +181,26 @@ function InvoicePreview() {
           <tbody>
             <tr>
               <td
-                rowSpan={6 + (invoice.subItems?.length ?? 0) + (roundOff ? 1 : 0)}
+                rowSpan={5 + (invoice.subItems?.length ?? 0) + (roundOff ? 1 : 0)}
                 className="border-r border-foreground/80 text-center align-top py-1"
               >
                 1
               </td>
               <td className="px-2 py-1 font-bold">{invoice.serviceTitle || "Services rendered"}</td>
               <td
-                rowSpan={6 + (invoice.subItems?.length ?? 0) + (roundOff ? 1 : 0)}
+                rowSpan={5 + (invoice.subItems?.length ?? 0) + (roundOff ? 1 : 0)}
                 className="border-l border-r border-foreground/80 text-center align-top py-1"
               >
                 {invoice.hsnCode || "—"}
               </td>
               <td
-                rowSpan={6 + (invoice.subItems?.length ?? 0) + (roundOff ? 1 : 0)}
+                rowSpan={5 + (invoice.subItems?.length ?? 0) + (roundOff ? 1 : 0)}
                 className="border-r border-foreground/80 text-center align-top py-1"
               >
                 {invoice.gstRate}%
               </td>
               <td
-                rowSpan={6 + (invoice.subItems?.length ?? 0) + (roundOff ? 1 : 0)}
+                rowSpan={5 + (invoice.subItems?.length ?? 0) + (roundOff ? 1 : 0)}
                 className="border-r border-foreground/80 text-center align-top py-1"
               >
                 1
