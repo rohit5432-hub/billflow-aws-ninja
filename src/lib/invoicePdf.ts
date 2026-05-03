@@ -363,8 +363,6 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
   });
 
   const sumHeadH = 26;
-  doc.setFillColor(225, 232, 240);
-  doc.rect(M, y, innerW, sumHeadH, "F");
   doc.rect(M, y, innerW, sumHeadH);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8.5);
