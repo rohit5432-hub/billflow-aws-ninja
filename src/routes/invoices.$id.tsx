@@ -148,7 +148,7 @@ function InvoicePreview() {
         <div className="grid grid-cols-2 border-x border-b border-foreground/80">
           {["Buyer (Bill to)", "Consignee (Ship to)"].map((title, idx) => (
             <div key={idx} className={`${idx === 0 ? "border-r border-foreground/80" : ""}`}>
-              <p className="text-[10px] font-bold text-foreground bg-[#E1E8F0] px-2 py-0.5">{title}</p>
+              <p className="text-[10px] font-bold text-foreground px-2 py-0.5">{title}</p>
               <div className="p-2">
                 <p className="font-bold">{customer.name}</p>
                 <p className="whitespace-pre-line">{customer.address}</p>
