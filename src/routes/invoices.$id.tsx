@@ -215,39 +215,38 @@ function InvoicePreview() {
                 <td className="px-2 py-0.5 text-right">{fmt(s.amount)}</td>
               </tr>
             ))}
-            {isIgst ? (
-              <tr>
-                <td className="px-2 py-0.5 text-right italic" colSpan={2}>
-                  IGST
-                </td>
-                <td className="px-2 py-0.5 text-right">{fmt(invoice.gstAmount)}</td>
-              </tr>
-            ) : (
-              <>
-                <tr>
-                  <td className="px-2 py-0.5 text-right italic" colSpan={2}>
-                    CGST
+            {(() => {
+              const taxLines: { label: string; amount: number }[] = [];
+              if (isIgst) {
+                taxLines.push({ label: "IGST", amount: invoice.gstAmount });
+              } else {
+                taxLines.push({ label: "CGST", amount: halfTax });
+                taxLines.push({ label: utLabel, amount: halfTax });
+              }
+              if (roundOff !== 0) {
+                taxLines.push({ label: "Round Off", amount: roundOff });
+              }
+              return taxLines.map((line, i) => (
+                <tr key={i}>
+                  <td className="px-2 py-0.5 text-right italic relative">
+                    {i === 0 && (
+                      <span className="absolute left-2 not-italic">Add :</span>
+                    )}
+                    {line.label}
                   </td>
-                  <td className="px-2 py-0.5 text-right">{fmt(halfTax)}</td>
-                </tr>
-                <tr>
-                  <td className="px-2 py-0.5 text-right italic" colSpan={2}>
-                    {utLabel}
+                  <td className="px-2 py-0.5 text-right">
+                    {line.label === "Round Off" && line.amount < 0
+                      ? `(-) ${fmt(Math.abs(line.amount))}`
+                      : fmt(line.amount)}
                   </td>
-                  <td className="px-2 py-0.5 text-right">{fmt(halfTax)}</td>
+                  <td className="px-2 py-0.5 text-right">
+                    {line.label === "Round Off" && line.amount < 0
+                      ? `(-) ${fmt(Math.abs(line.amount))}`
+                      : fmt(line.amount)}
+                  </td>
                 </tr>
-              </>
-            )}
-            {roundOff !== 0 && (
-              <tr>
-                <td className="px-2 py-0.5 text-right italic" colSpan={2}>
-                  Round Off
-                </td>
-                <td className="px-2 py-0.5 text-right">
-                  {roundOff < 0 ? `(-) ${fmt(Math.abs(roundOff))}` : fmt(roundOff)}
-                </td>
-              </tr>
-            )}
+              ));
+            })()}
             <tr className="border-t border-foreground/80 font-bold">
               <td className="px-2 py-1 text-right">Total</td>
               <td className="border-l border-foreground/80 text-center py-1" colSpan={2}>
