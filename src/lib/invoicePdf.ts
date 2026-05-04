@@ -298,7 +298,10 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
     doc.setFont("helvetica", "italic");
     doc.text("Round Off", colX[1] + cols[1] - 6, y + 11, { align: "right" });
     doc.setFont("helvetica", "normal");
-    doc.text(fmt(roundOff), colX[6] + cols[6] - 4, y + 11, { align: "right" });
+    const roundStr =
+      roundOff < 0 ? `(-) ${fmt(Math.abs(roundOff))}` : fmt(roundOff);
+    doc.text(roundStr, colX[5] + cols[5] - 4, y + 11, { align: "right" });
+    doc.text(roundStr, colX[6] + cols[6] - 4, y + 11, { align: "right" });
     y += rowH;
   }
   // "Add :" label aligned with first tax row
@@ -333,7 +336,7 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
   doc.setFontSize(10);
   doc.text("Total", colX[1] + cols[1] - 4, y + 12, { align: "right" });
   doc.text("1 nos", colX[4] + cols[4] / 2, y + 12, { align: "center" });
-  doc.text(`\u20B9 ${fmt(grandTotal)}`, colX[6] + cols[6] - 4, y + 12, { align: "right" });
+  doc.text(`Rs. ${fmt(grandTotal)}`, colX[6] + cols[6] - 4, y + 12, { align: "right" });
   y += totalH;
 
   // Amount in words box
