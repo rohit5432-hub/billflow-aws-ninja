@@ -257,7 +257,7 @@ function InvoicePreview() {
                     <td className="px-2 py-1"></td>
                     <td className="px-2 py-1 text-center">1 nos</td>
                     <td className="px-2 py-1"></td>
-                    <td className="px-2 py-1 text-right">₹ {fmt(grandTotal)}</td>
+                    <td className="px-2 py-1 text-right">Rs. {fmt(grandTotal)}</td>
                   </tr>
                 </>
               );
