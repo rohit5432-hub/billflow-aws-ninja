@@ -179,42 +179,6 @@ function InvoicePreview() {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td
-                rowSpan={5 + (invoice.subItems?.length ?? 0) + (roundOff ? 1 : 0)}
-                className="border-r border-foreground/80 text-center align-top py-1"
-              >
-                1
-              </td>
-              <td className="px-2 py-1 font-bold text-center">{invoice.serviceTitle || "Services rendered"}</td>
-              <td
-                rowSpan={5 + (invoice.subItems?.length ?? 0) + (roundOff ? 1 : 0)}
-                className="border-l border-r border-foreground/80 text-center align-top py-1"
-              >
-                {invoice.hsnCode || "—"}
-              </td>
-              <td
-                rowSpan={5 + (invoice.subItems?.length ?? 0) + (roundOff ? 1 : 0)}
-                className="border-r border-foreground/80 text-center align-top py-1"
-              >
-                {invoice.gstRate}%
-              </td>
-              <td
-                rowSpan={5 + (invoice.subItems?.length ?? 0) + (roundOff ? 1 : 0)}
-                className="border-r border-foreground/80 text-center align-top py-1"
-              >
-                1
-              </td>
-              <td className="px-2 py-1 text-right font-bold">{fmt(subtotal)}</td>
-              <td className="px-2 py-1 text-right font-bold">{fmt(subtotal)}</td>
-            </tr>
-            {(invoice.subItems ?? []).map((s, i) => (
-              <tr key={i}>
-                <td className={`px-2 py-0.5 text-center ${s.italic ? "italic" : ""}`}>{s.label}</td>
-                <td className="px-2 py-0.5 text-right">{fmt(s.amount)}</td>
-                <td className="px-2 py-0.5 text-right">{fmt(s.amount)}</td>
-              </tr>
-            ))}
             {(() => {
               const taxLines: { label: string; amount: number }[] = [];
               if (isIgst) {
@@ -226,34 +190,78 @@ function InvoicePreview() {
               if (roundOff !== 0) {
                 taxLines.push({ label: "Round Off", amount: roundOff });
               }
-              return taxLines.map((line, i) => (
-                <tr key={i}>
-                  <td className="px-2 py-0.5 text-right italic relative">
-                    {i === 0 && (
-                      <span className="absolute left-2 not-italic">Add :</span>
-                    )}
-                    {line.label}
-                  </td>
-                  <td className="px-2 py-0.5 text-right">
-                    {line.label === "Round Off" && line.amount < 0
-                      ? `(-) ${fmt(Math.abs(line.amount))}`
-                      : fmt(line.amount)}
-                  </td>
-                  <td className="px-2 py-0.5 text-right">
-                    {line.label === "Round Off" && line.amount < 0
-                      ? `(-) ${fmt(Math.abs(line.amount))}`
-                      : fmt(line.amount)}
-                  </td>
-                </tr>
-              ));
+              const subN = invoice.subItems?.length ?? 0;
+              const sideSpan = 1 + subN + taxLines.length;
+              const fmtTax = (line: { label: string; amount: number }) =>
+                line.label === "Round Off" && line.amount < 0
+                  ? `(-) ${fmt(Math.abs(line.amount))}`
+                  : fmt(line.amount);
+              return (
+                <>
+                  <tr>
+                    <td
+                      rowSpan={sideSpan}
+                      className="border-r border-foreground/80 text-center align-top py-1"
+                    >
+                      1
+                    </td>
+                    <td className="px-2 py-1 font-bold text-center">
+                      {invoice.serviceTitle || "Services rendered"}
+                    </td>
+                    <td
+                      rowSpan={sideSpan}
+                      className="border-r border-foreground/80 text-center align-top py-1"
+                    >
+                      {invoice.hsnCode || "—"}
+                    </td>
+                    <td
+                      rowSpan={sideSpan}
+                      className="border-r border-foreground/80 text-center align-top py-1"
+                    >
+                      {invoice.gstRate}%
+                    </td>
+                    <td
+                      rowSpan={sideSpan}
+                      className="border-r border-foreground/80 text-center align-top py-1"
+                    >
+                      1
+                    </td>
+                    <td className="px-2 py-1 text-right font-bold">{fmt(subtotal)}</td>
+                    <td className="px-2 py-1 text-right font-bold">{fmt(subtotal)}</td>
+                  </tr>
+                  {(invoice.subItems ?? []).map((s, i) => (
+                    <tr key={`sub-${i}`}>
+                      <td className={`px-2 py-0.5 text-center ${s.italic ? "italic" : ""}`}>
+                        {s.label}
+                      </td>
+                      <td className="px-2 py-0.5 text-right">{fmt(s.amount)}</td>
+                      <td className="px-2 py-0.5 text-right">{fmt(s.amount)}</td>
+                    </tr>
+                  ))}
+                  {taxLines.map((line, i) => (
+                    <tr key={`tax-${i}`}>
+                      <td className="px-2 py-0.5 text-right italic relative">
+                        {i === 0 && (
+                          <span className="absolute left-2 not-italic">Add :</span>
+                        )}
+                        {line.label}
+                      </td>
+                      <td className="px-2 py-0.5 text-right">{fmtTax(line)}</td>
+                      <td className="px-2 py-0.5 text-right">{fmtTax(line)}</td>
+                    </tr>
+                  ))}
+                  <tr className="border-t border-foreground/80 font-bold">
+                    <td className="px-2 py-1"></td>
+                    <td className="px-2 py-1 text-right">Total</td>
+                    <td className="px-2 py-1"></td>
+                    <td className="px-2 py-1"></td>
+                    <td className="px-2 py-1 text-center">1 nos</td>
+                    <td className="px-2 py-1"></td>
+                    <td className="px-2 py-1 text-right">₹ {fmt(grandTotal)}</td>
+                  </tr>
+                </>
+              );
             })()}
-            <tr className="border-t border-foreground/80 font-bold">
-              <td className="px-2 py-1 text-right">Total</td>
-              <td className="border-l border-foreground/80 text-center py-1" colSpan={2}>
-                1 nos
-              </td>
-              <td className="px-2 py-1 text-right">₹ {fmt(grandTotal)}</td>
-            </tr>
           </tbody>
         </table>
 
