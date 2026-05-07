@@ -95,3 +95,4 @@ aws cloudformation delete-stack --stack-name billflow-prod --region ap-south-1
 - Stack region defaults to `ap-south-1`. Override with `AWS_REGION=us-east-1 ./deploy.sh`.
 - DynamoDB schema is intentionally simple (single table). Add a GSI later if you need to query invoices by customer or date efficiently.
 - Auth is **not** implemented on the API layer. For production add Cognito + a JWT authorizer on the HTTP API, or signed requests via CloudFront.
+- **Static-only build**: the project is built on TanStack Start (which supports SSR). For S3 hosting we run `vite build` and rely on the SPA fallback in CloudFront (404/403 → `/index.html`). All routing happens client-side; no SSR is executed in AWS. If `dist/client` is empty after build, run `bunx vite build` directly and check `vite.config.ts` for an SSR-only output target — the `@lovable.dev/vite-tanstack-config` preset emits client assets to `dist/client/`.
