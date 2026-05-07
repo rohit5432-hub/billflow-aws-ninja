@@ -8,9 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useData, type Invoice, type GstType, type InvoiceSubItem } from "@/lib/store";
 import { getUsdToInr, formatINR } from "@/lib/fx";
+import { TERMS_OPTIONS } from "@/lib/seller";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 import { toast } from "sonner";
-import { FilePlus2, Plus, Trash2 } from "lucide-react";
+import { FilePlus2, Plus, Trash2, ListChecks } from "lucide-react";
 
 export const Route = createFileRoute("/invoices/new")({
   head: () => ({ meta: [{ title: "Create Invoice — Apoyphe" }] }),
@@ -45,6 +48,12 @@ function NewInvoice() {
   const [placeOfSupply, setPlaceOfSupply] = useState("Telangana");
   const [roundOff, setRoundOff] = useState("0");
   const [subItems, setSubItems] = useState<InvoiceSubItem[]>([]);
+  const [selectedTerms, setSelectedTerms] = useState<string[]>([
+    TERMS_OPTIONS[0],
+    TERMS_OPTIONS[1],
+  ]);
+  const toggleTerm = (t: string) =>
+    setSelectedTerms((s) => (s.includes(t) ? s.filter((x) => x !== t) : [...s, t]));
 
   const addSubItem = () => setSubItems((s) => [...s, { label: "", amount: 0 }]);
   const removeSubItem = (i: number) => setSubItems((s) => s.filter((_, idx) => idx !== i));
@@ -81,6 +90,7 @@ function NewInvoice() {
       consigneeSameAsBuyer: true,
       roundOff: ro || undefined,
       subItems: subItems.filter((s) => s.label.trim() && s.amount > 0),
+      terms: selectedTerms.length ? selectedTerms : undefined,
     };
     const created = addInvoice(inv);
     toast.success("Invoice created");
