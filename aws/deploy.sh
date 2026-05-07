@@ -48,11 +48,17 @@ echo "==> Building frontend (SPA)"
 cd ..
 VITE_API_URL="/api" bun run build:spa
 
+# Locate the static client output (TanStack Start emits to dist/client by default,
+# falls back to dist/ if a custom config is used).
+DIST_DIR="dist/client"
+[[ -d "$DIST_DIR" ]] || DIST_DIR="dist"
+echo "==> Using build output: $DIST_DIR"
+
 # 4. Sync to S3
-echo "==> Syncing dist/ to s3://$BUCKET"
-aws s3 sync dist/ "s3://$BUCKET" --delete --cache-control "public,max-age=31536000,immutable" \
-  --exclude "index.html"
-aws s3 cp dist/index.html "s3://$BUCKET/index.html" --cache-control "no-cache"
+echo "==> Syncing $DIST_DIR/ to s3://$BUCKET"
+aws s3 sync "$DIST_DIR/" "s3://$BUCKET" --delete \
+  --cache-control "public,max-age=31536000,immutable" --exclude "index.html"
+aws s3 cp "$DIST_DIR/index.html" "s3://$BUCKET/index.html" --cache-control "no-cache"
 
 # 5. Invalidate CloudFront
 DIST_ID=$(aws cloudfront list-distributions --query \
