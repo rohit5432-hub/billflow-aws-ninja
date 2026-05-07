@@ -230,6 +230,47 @@ function NewInvoice() {
                 </div>
               ))}
             </div>
+
+            {/* Terms & Conditions picker */}
+            <div className="space-y-2 pt-2">
+              <div className="flex items-center justify-between">
+                <Label>Terms &amp; Conditions</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button type="button" size="sm" variant="outline">
+                      <ListChecks className="h-3 w-3 mr-1" />
+                      Choose Terms ({selectedTerms.length})
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[420px] max-h-[360px] overflow-auto" align="end">
+                    <div className="space-y-2">
+                      {TERMS_OPTIONS.map((t, i) => (
+                        <label
+                          key={i}
+                          className="flex items-start gap-2 text-xs cursor-pointer hover:bg-muted/40 rounded p-1"
+                        >
+                          <Checkbox
+                            checked={selectedTerms.includes(t)}
+                            onCheckedChange={() => toggleTerm(t)}
+                            className="mt-0.5"
+                          />
+                          <span>{t}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
+              {selectedTerms.length === 0 ? (
+                <p className="text-xs text-muted-foreground">No terms selected — invoice will use defaults.</p>
+              ) : (
+                <ol className="list-decimal pl-5 text-xs text-muted-foreground space-y-0.5">
+                  {selectedTerms.map((t, i) => (
+                    <li key={i}>{t}</li>
+                  ))}
+                </ol>
+              )}
+            </div>
           </div>
         </Card>
 
