@@ -23,6 +23,7 @@ type Invoice = {
   placeOfSupply?: string;
   consigneeSameAsBuyer?: boolean;
   subItems?: { label: string; amount: number; italic?: boolean }[];
+  terms?: string[];
 };
 
 type Customer = {
@@ -458,7 +459,8 @@ export async function generateInvoicePDF(invoice: Invoice, customer: Customer) {
   // Terms + signatory — measure actual wrapped height first
   const termLineH = 11;
   const termsColW = innerW / 2 - 12;
-  const wrappedTerms = TERMS.map((t, i) =>
+  const termsList = invoice.terms && invoice.terms.length ? invoice.terms : TERMS;
+  const wrappedTerms = termsList.map((t, i) =>
     doc.splitTextToSize(`${i + 1}. ${t}`, termsColW) as string[],
   );
   const termsTextH = wrappedTerms.reduce(
