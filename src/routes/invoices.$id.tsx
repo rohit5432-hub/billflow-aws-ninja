@@ -381,7 +381,7 @@ function InvoicePreview() {
           <div className="p-2 border-r border-foreground/80">
             <p className="font-bold">Terms and Conditions:</p>
             <ol className="list-decimal pl-4 space-y-0.5 mt-1">
-              {TERMS.map((t, i) => (
+              {(invoice.terms && invoice.terms.length ? invoice.terms : TERMS).map((t, i) => (
                 <li key={i}>{t}</li>
               ))}
             </ol>

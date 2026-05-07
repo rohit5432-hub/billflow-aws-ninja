@@ -8,9 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useData, type Invoice, type GstType, type InvoiceSubItem } from "@/lib/store";
 import { getUsdToInr, formatINR } from "@/lib/fx";
+import { TERMS_OPTIONS } from "@/lib/seller";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 import { toast } from "sonner";
-import { FilePlus2, Plus, Trash2 } from "lucide-react";
+import { FilePlus2, Plus, Trash2, ListChecks } from "lucide-react";
 
 export const Route = createFileRoute("/invoices/new")({
   head: () => ({ meta: [{ title: "Create Invoice — Apoyphe" }] }),
@@ -45,6 +48,12 @@ function NewInvoice() {
   const [placeOfSupply, setPlaceOfSupply] = useState("Telangana");
   const [roundOff, setRoundOff] = useState("0");
   const [subItems, setSubItems] = useState<InvoiceSubItem[]>([]);
+  const [selectedTerms, setSelectedTerms] = useState<string[]>([
+    TERMS_OPTIONS[0],
+    TERMS_OPTIONS[1],
+  ]);
+  const toggleTerm = (t: string) =>
+    setSelectedTerms((s) => (s.includes(t) ? s.filter((x) => x !== t) : [...s, t]));
 
   const addSubItem = () => setSubItems((s) => [...s, { label: "", amount: 0 }]);
   const removeSubItem = (i: number) => setSubItems((s) => s.filter((_, idx) => idx !== i));
@@ -81,6 +90,7 @@ function NewInvoice() {
       consigneeSameAsBuyer: true,
       roundOff: ro || undefined,
       subItems: subItems.filter((s) => s.label.trim() && s.amount > 0),
+      terms: selectedTerms.length ? selectedTerms : undefined,
     };
     const created = addInvoice(inv);
     toast.success("Invoice created");
@@ -219,6 +229,47 @@ function NewInvoice() {
                   </Button>
                 </div>
               ))}
+            </div>
+
+            {/* Terms & Conditions picker */}
+            <div className="space-y-2 pt-2">
+              <div className="flex items-center justify-between">
+                <Label>Terms &amp; Conditions</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button type="button" size="sm" variant="outline">
+                      <ListChecks className="h-3 w-3 mr-1" />
+                      Choose Terms ({selectedTerms.length})
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[420px] max-h-[360px] overflow-auto" align="end">
+                    <div className="space-y-2">
+                      {TERMS_OPTIONS.map((t, i) => (
+                        <label
+                          key={i}
+                          className="flex items-start gap-2 text-xs cursor-pointer hover:bg-muted/40 rounded p-1"
+                        >
+                          <Checkbox
+                            checked={selectedTerms.includes(t)}
+                            onCheckedChange={() => toggleTerm(t)}
+                            className="mt-0.5"
+                          />
+                          <span>{t}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
+              {selectedTerms.length === 0 ? (
+                <p className="text-xs text-muted-foreground">No terms selected — invoice will use defaults.</p>
+              ) : (
+                <ol className="list-decimal pl-5 text-xs text-muted-foreground space-y-0.5">
+                  {selectedTerms.map((t, i) => (
+                    <li key={i}>{t}</li>
+                  ))}
+                </ol>
+              )}
             </div>
           </div>
         </Card>
