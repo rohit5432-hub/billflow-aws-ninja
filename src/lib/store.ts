@@ -63,6 +63,7 @@ export type Invoice = {
   placeOfSupply?: string;
   consigneeSameAsBuyer?: boolean;
   roundOff?: number;           // can be negative
+  terms?: string[];            // selected terms & conditions for this invoice
 };
 
 type AuthState = {
