@@ -28,6 +28,7 @@ export type TeamUser = {
   email: string;
   role: UserRole;
   phone?: string;
+  password?: string;
   createdAt: string;
 };
 

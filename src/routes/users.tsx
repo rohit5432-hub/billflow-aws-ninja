@@ -14,7 +14,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useData, type UserRole } from "@/lib/store";
 import { toast } from "sonner";
-import { UserPlus, Trash2 } from "lucide-react";
+import { UserPlus, Trash2, Eye, EyeOff } from "lucide-react";
 
 export const Route = createFileRoute("/users")({
   head: () => ({ meta: [{ title: "Users — Apoyphe" }] }),
@@ -39,8 +39,12 @@ function UsersPage() {
   const users = useData((s) => s.users);
   const addUser = useData((s) => s.addUser);
   const deleteUser = useData((s) => s.deleteUser);
-  const [form, setForm] = useState<{ name: string; email: string; phone: string; role: UserRole }>({
-    name: "", email: "", phone: "", role: "viewer",
+  const [showPwd, setShowPwd] = useState(false);
+  const [revealId, setRevealId] = useState<string | null>(null);
+  const [form, setForm] = useState<{
+    name: string; email: string; phone: string; role: UserRole; password: string;
+  }>({
+    name: "", email: "", phone: "", role: "viewer", password: "",
   });
 
   const submit = (e: React.FormEvent) => {
@@ -49,13 +53,18 @@ function UsersPage() {
       toast.error("Name and email are required");
       return;
     }
+    if (!form.password || form.password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
     addUser({
       name: form.name.trim(),
       email: form.email.trim(),
       phone: form.phone.trim() || undefined,
       role: form.role,
+      password: form.password,
     });
-    setForm({ name: "", email: "", phone: "", role: "viewer" });
+    setForm({ name: "", email: "", phone: "", role: "viewer", password: "" });
     toast.success("User added");
   };
 
@@ -76,6 +85,29 @@ function UsersPage() {
             <div className="space-y-1.5">
               <Label>Phone</Label>
               <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Password</Label>
+              <div className="relative">
+                <Input
+                  type={showPwd ? "text" : "password"}
+                  value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  placeholder="Min 6 characters"
+                  required
+                  minLength={6}
+                  maxLength={64}
+                  className="pr-9"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPwd((v) => !v)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  aria-label={showPwd ? "Hide password" : "Show password"}
+                >
+                  {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
             <div className="space-y-1.5">
               <Label>Role</Label>
@@ -105,6 +137,7 @@ function UsersPage() {
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Phone</TableHead>
+                  <TableHead>Password</TableHead>
                   <TableHead>Role</TableHead>
                   <TableHead className="w-12" />
                 </TableRow>
@@ -115,6 +148,20 @@ function UsersPage() {
                     <TableCell className="font-medium">{u.name}</TableCell>
                     <TableCell>{u.email}</TableCell>
                     <TableCell className="text-muted-foreground">{u.phone || "—"}</TableCell>
+                    <TableCell className="font-mono text-xs">
+                      {u.password ? (
+                        <button
+                          type="button"
+                          onClick={() => setRevealId(revealId === u.id ? null : u.id)}
+                          className="inline-flex items-center gap-1 hover:text-foreground text-muted-foreground"
+                        >
+                          {revealId === u.id ? u.password : "••••••••"}
+                          {revealId === u.id ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                        </button>
+                      ) : (
+                        "—"
+                      )}
+                    </TableCell>
                     <TableCell>
                       <Badge variant={roleVariant[u.role]} className="capitalize">{u.role}</Badge>
                     </TableCell>
