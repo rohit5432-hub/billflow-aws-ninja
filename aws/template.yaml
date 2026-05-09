@@ -103,6 +103,27 @@ Resources:
                 AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${Distribution}"
 
   # ---------- CloudFront ----------
+  # SPA router: rewrite non-file, non-/api requests to /index.html so deep links work.
+  # Attached ONLY to the default S3 behavior — /api/* is untouched and reaches API Gateway as-is.
+  SpaRouterFunction:
+    Type: AWS::CloudFront::Function
+    Properties:
+      Name: !Sub "${AppName}-${Stage}-spa-router"
+      AutoPublish: true
+      FunctionConfig:
+        Comment: SPA fallback to /index.html
+        Runtime: cloudfront-js-2.0
+      FunctionCode: |
+        function handler(event) {
+          var req = event.request;
+          var uri = req.uri;
+          if (uri.startsWith('/api/')) return req;
+          // Has a file extension → serve as-is (assets, downloads)
+          if (uri.indexOf('.') !== -1) return req;
+          req.uri = '/index.html';
+          return req;
+        }
+
   OAC:
     Type: AWS::CloudFront::OriginAccessControl
     Properties:
