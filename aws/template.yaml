@@ -103,6 +103,27 @@ Resources:
                 AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${Distribution}"
 
   # ---------- CloudFront ----------
+  # SPA router: rewrite non-file, non-/api requests to /index.html so deep links work.
+  # Attached ONLY to the default S3 behavior — /api/* is untouched and reaches API Gateway as-is.
+  SpaRouterFunction:
+    Type: AWS::CloudFront::Function
+    Properties:
+      Name: !Sub "${AppName}-${Stage}-spa-router"
+      AutoPublish: true
+      FunctionConfig:
+        Comment: SPA fallback to /index.html
+        Runtime: cloudfront-js-2.0
+      FunctionCode: |
+        function handler(event) {
+          var req = event.request;
+          var uri = req.uri;
+          if (uri.startsWith('/api/')) return req;
+          // Has a file extension → serve as-is (assets, downloads)
+          if (uri.indexOf('.') !== -1) return req;
+          req.uri = '/index.html';
+          return req;
+        }
+
   OAC:
     Type: AWS::CloudFront::OriginAccessControl
     Properties:
@@ -136,6 +157,9 @@ Resources:
           CachedMethods: [GET, HEAD]
           Compress: true
           CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6 # CachingOptimized
+          FunctionAssociations:
+            - EventType: viewer-request
+              FunctionARN: !GetAtt SpaRouterFunction.FunctionMetadata.FunctionARN
         CacheBehaviors:
           - PathPattern: /api/*
             TargetOriginId: api
@@ -143,13 +167,6 @@ Resources:
             AllowedMethods: [GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE]
             CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad # CachingDisabled
             OriginRequestPolicyId: b689b0a8-53d0-40ab-baf2-68738e2966ac # AllViewerExceptHostHeader
-        CustomErrorResponses:
-          - ErrorCode: 403
-            ResponseCode: 200
-            ResponsePagePath: /index.html
-          - ErrorCode: 404
-            ResponseCode: 200
-            ResponsePagePath: /index.html
 
 Outputs:
   SiteBucketName:
